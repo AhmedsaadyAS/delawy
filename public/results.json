@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-16T15:09:21.443040Z",
+  "generated_at": "2026-11-16T15:21:43.156327Z",
   "records_total": 100,
   "success_rate": 100.0,
   "success_count": 100,
@@ -43,8 +43,8 @@
     }
   },
   "manual": {
-    "filled": 5,
-    "matched": 5,
+    "filled": 13,
+    "matched": 13,
     "wrong_prices": 0,
     "wrong_sellers": 0,
     "wrong_stock": 0,
