@@ -1,0 +1,15 @@
+<!doctype html><html><head><title>Spike sample — embedded list payload (upstream test fixture)</title></head><body>
+<!-- Fixture from the upstream noon-deals-bot test suite (tests/test_scraper.py,
+     MOCK_EMBEDDED_HTML): reference-serialized JS, unquoted keys, !0/!1
+     booleans, \x3C escapes — not JSON. One priced hit (N23157381A, 320/640),
+     one hit without a price that must be dropped. -->
+<script>window.__ssr={facetsV2:null,search:$R[10]={limit:50,page:1},hits:$R[11]=[$R[12]={offer_code:"e16214c834f87cce",catalog_sku:"N23157381A-1",sku:"N23157381A",sku_config:"N23157381A",brand:"CeraVe",name:"Moisturising Lotion \x26 Ceramides 236ml",price:640,sale_price:320,url:"moisturising-lotion-ceramides-236ml",image_url:"https://f.nooncdn.com/p/pzsku/Z038Z/45/_/1779179010/67bb178e.jpg",is_buyable:!0,show_3d:!1,product_rating:$R[13]={best_rating:5,count:7235,value:4.53},estimated_delivery_date:"Get it \x3Cb\x3ETomorrow\x3C/b\x3E",store_name:"noon",flags:$R[14]=["fbn"],assets:$R[15]={}},$R[16]={sku_config:"N99999999A",name:"No Price Item",url:"no-price-item"}],mpHits:$R[17]=[]}</script>
+<div data-qa="plp-product-box">
+  <a href="/egypt-en/some-item/N11111111A/p/?o=abc">
+    <div data-qa="plp-product-box-name">Some Item</div>
+    <div data-qa="plp-product-box-price">EGP 250</div>
+    <s>EGP 500</s>
+    <img src="https://f.nooncdn.com/p/x.jpg">
+  </a>
+</div>
+</body></html>

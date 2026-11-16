@@ -1,0 +1,69 @@
+# Spike — Noon Single-Product Fetcher (48–72h)
+
+> Spike only. No Worker, no D1, no Telegram bot, no feature outside this Spike.
+> Question to answer with numbers: can we fetch a Noon Egypt product's
+> price by link/SKU stably and accurately?
+
+## Files
+
+| File | What it is |
+|---|---|
+| `scraper.py` | Copied verbatim from Vette1123/noon-deals-bot (MIT) — `_fetch_html`, `_is_akamai_challenge`, `_normalize_item`, `_js_parse_value`, `_parse_embedded_payload`, `parse_products_from_html`, `feed_url`. See `../THIRD_PARTY_NOTICES.md`. |
+| `categories.py` | Copied verbatim from the same repo (MIT) — `FEED_CODES`, `CATEGORIES`. |
+| `build_sku_list.py` | Builds `skus.csv`: 50 SKUs from 5 feeds (page 1 each). |
+| `skus.csv` | The 50 SKUs: buckets <500 (12), 500–3000 (16), 3000–15000 (14), >15000 (8); 42 discounted, 8 not; 37 sellers (max 3 each); 38 brands; 43 fulfilled_by_noon + 5 not (of the 48 still on feed page 1 at re-check — 2 SKUs rotated out of page 1 within an hour, PDPs still valid). Generated 2026-11-16. |
+| `fetcher.py` | Strategy A (PDP) + B (search), one unified record per call. |
+| `run_spike.py` | Batch runner: A then B per SKU, 2–5 s random delay, stops after HTTP 429 twice in a row, appends to `data/results.jsonl`. |
+| `test_fetcher.py` | pytest, parsers only, no network. Fixtures in `samples/`. |
+| `samples/pdp_sample.html` | Trimmed real PDP (N21961435A, 2026-11-16): JSON-LD Product + data-qa divs + complete SSR offer object. |
+| `samples/list_sample.html` | Upstream test fixture (embedded JS payload + product card). |
+| `data/results.jsonl` | Appended by every run (committed by Actions). |
+| `data/failures/` | First 20 KB of HTML on parse failure — Actions artifact only, never committed (see `.gitignore`). |
+
+## What was discovered (real pages, 2026-11-16)
+
+- Local fetch works from this environment: no Akamai challenge on feed
+  pages, PDP or search (5 feed pages, 1 PDP, 1 search — all HTTP 200).
+- PDP parser order, all three agree on the test product (1829 / 3300,
+  Dokkan Tech): JSON-LD Product/offers → SSR offer object
+  (`$R[n]={offer_code, sku_config, sale_price, price, store_name, stock,
+  is_buyable}`) → data-qa `div-price-now` / `div-price-was`.
+- Search URL: `https://www.noon.com/egypt-en/search?q={SKU}` (from the
+  JSON-LD WebSite SearchAction). It works and returns 1 product for a SKU.
+- **Strategy B measures a different offer:** for N21961435A, search
+  returned Egypt Laptop at 1799 while the pinned PDP (`?o=f96a…`)
+  returned Dokkan Tech at 1829. Same SKU, different seller/price.
+  The manual check (task 4) compares against the PDP URL, not search.
+- Feeds used: `electronics-and-mobiles/mobiles-and-accessories`
+  (not in upstream FEED_CODES, but a real browse path — 50 products on
+  page 1, rate 2% in upstream `_RATE_PREFIXES`),
+  `electronics-and-mobiles/computers-and-accessories`,
+  `electronics-and-mobiles/wearable-technology`,
+  `electronics-and-mobiles/home-audio`, `home-and-kitchen/home-appliances-31235`.
+
+## Run locally
+
+```bash
+python -m venv .venv && .venv/bin/pip install -r spike/requirements.txt
+python -m pytest spike/test_fetcher.py -q
+python spike/run_spike.py --only-sku N21961435A --strategy A
+python spike/run_spike.py   # full batch: 50 SKUs × A + B
+```
+
+## Run in GitHub Actions
+
+`.github/workflows/spike.yml`: hourly cron + `workflow_dispatch`
+(optional `sku` input = one SKU only). Two jobs, sequential:
+`spike-warp` (50 SKUs, WARP proxy `socks5h://127.0.0.1:40000`) then
+`spike-control` (first 10 SKUs, no WARP). Each appends to
+`spike/data/results.jsonl` and commits with `[skip ci]`
+(`git pull --rebase` before push). `publish-pages` deploys `public/`.
+
+**Before the first run:** Settings → Pages → Source: GitHub Actions
+(the repo needs this once; the workflow cannot enable Pages itself).
+
+## Go / No-Go (task 7)
+
+Go if success rate ≥ 90% **and** zero wrong prices in the manual sample;
+otherwise No-Go with the reason. Computed by `spike/report.py`
+(task 7 — not in this commit).

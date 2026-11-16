@@ -1,0 +1,8 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# Spike: parse-failure HTML is an Actions artifact, never committed.
+spike/data/failures/
