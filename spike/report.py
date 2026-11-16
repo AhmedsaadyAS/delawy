@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Build the Spike results page data + Markdown report.
 
-Reads spike/data/results.jsonl (appended hourly by Actions) and, when
-present, spike/data/manual_summary.json (from compare_manual.py) and
+Reads spike/data/results.jsonl (WARP job) and spike/data/results-control.jsonl
+(no-WARP control job), appended hourly by Actions, and, when present,
+spike/data/manual_summary.json (from compare_manual.py) and
 spike/data/dispatch.jsonl (from dispatch_test.py).
 
 Writes:
@@ -17,7 +18,7 @@ Go / No-Go (per the Spike spec):
            cannot be made, and the page says so instead of guessing.
 
 Usage:
-    python spike/report.py [--results spike/data/results.jsonl]
+    python spike/report.py [--results spike/data/results.jsonl spike/data/results-control.jsonl]
         [--manual spike/data/manual_summary.json]
         [--dispatch spike/data/dispatch.jsonl]
         [--out-json public/results.json] [--out-md spike/SPIKE-RESULTS.md]
@@ -87,8 +88,12 @@ def _group_stats(records: list[dict], key: str) -> dict:
     return out
 
 
-def build(results_path: str, manual_path: str, dispatch_path: str) -> dict:
-    records = _load_jsonl(results_path)
+def build(results_paths: str | list[str], manual_path: str, dispatch_path: str) -> dict:
+    if isinstance(results_paths, str):
+        results_paths = [results_paths]
+    records: list[dict] = []
+    for path in results_paths:
+        records.extend(_load_jsonl(path))
     manual = _load_json(manual_path)
     dispatch = _load_jsonl(dispatch_path)
 
@@ -259,7 +264,9 @@ def render_markdown(summary: dict) -> str:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--results", default="spike/data/results.jsonl")
+    ap.add_argument("--results", nargs="+",
+                    default=["spike/data/results.jsonl",
+                             "spike/data/results-control.jsonl"])
     ap.add_argument("--manual", default="spike/data/manual_summary.json")
     ap.add_argument("--dispatch", default="spike/data/dispatch.jsonl")
     ap.add_argument("--out-json", default="public/results.json")

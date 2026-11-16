@@ -98,3 +98,21 @@ def test_per_sku_keeps_last_price(tmp_path):
     assert len(s["per_sku"]) == 1
     assert s["per_sku"][0]["last_price"] == 90.0
     assert s["per_sku"][0]["status"] == "ok"
+
+
+def test_reads_both_results_files(tmp_path):
+    # WARP file + control file are merged; a missing control file is fine.
+    warp = tmp_path / "results.jsonl"
+    ctrl = tmp_path / "results-control.jsonl"
+    with open(warp, "w", encoding="utf-8") as f:
+        f.write(json.dumps(_rec("N00000001A", warp=True)) + "\n")
+    with open(ctrl, "w", encoding="utf-8") as f:
+        f.write(json.dumps(_rec("N00000002A", warp=False)) + "\n")
+    s = build([str(warp), str(ctrl)], str(tmp_path / "missing.json"),
+              str(tmp_path / "missing2.jsonl"))
+    assert s["records_total"] == 2
+    assert s["by_warp"]["True"]["records"] == 1
+    assert s["by_warp"]["False"]["records"] == 1
+    s2 = build([str(warp), str(tmp_path / "no-such-file.jsonl")],
+               str(tmp_path / "missing.json"), str(tmp_path / "missing2.jsonl"))
+    assert s2["records_total"] == 1
