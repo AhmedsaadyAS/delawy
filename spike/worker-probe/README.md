@@ -28,6 +28,15 @@ are stored in this repo.
   worth testing further after the Spike.
 - Anything in between — note the count in `SPIKE-RESULTS.md`.
 
+## Local run (2026-11-16, inconclusive)
+
+`npx wrangler dev` (Miniflare, local simulation) ran, but all 10 fetches
+failed immediately with `internal error` (`http_status: null`,
+`akamai_challenge: false`) — see `probe-local-20261116.json`. The local
+runtime cannot reach noon.com at all, so this says nothing about
+Cloudflare's edge. The real test still needs `wrangler dev --remote`
+or a deploy with a Cloudflare account.
+
 ## Delete after the Spike
 
 ```bash
