@@ -1,0 +1,1 @@
+{"description":"Spike-only probe: does Akamai block a direct fetch from a Cloudflare Worker? Delete after the Spike.","devDependencies":{"wrangler":"^4.163.0"},"name":"delawy-spike-worker-probe","private":true,"scripts":{"deploy":"wrangler deploy","dev":"wrangler dev"},"version":"0.1.0"}

@@ -1,0 +1,4 @@
+# Spike-only probe — delete after the Spike. No bindings, no KV, no D1.
+name = "delawy-spike-worker-probe"
+main = "src/index.js"
+compatibility_date = "2026-11-16"
