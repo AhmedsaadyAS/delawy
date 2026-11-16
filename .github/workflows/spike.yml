@@ -123,13 +123,17 @@ jobs:
       - name: Install dependencies
         run: pip install -r spike/requirements.txt
 
+      # The control job writes its own file: the WARP job and the control
+      # job both append to results.jsonl in the same hour, and the two
+      # appends conflict on `git pull --rebase` (the first Run's control
+      # job lost its 20 records this way). Separate files never conflict.
       - name: Run spike control (no WARP, first 10 SKUs)
         run: |
           head -11 spike/skus.csv > /tmp/control_skus.csv
           if [ -n "${{ inputs.sku }}" ]; then
-            python spike/run_spike.py --skus /tmp/control_skus.csv --only-sku "${{ inputs.sku }}" --warp false
+            python spike/run_spike.py --skus /tmp/control_skus.csv --only-sku "${{ inputs.sku }}" --warp false --out spike/data/results-control.jsonl
           else
-            python spike/run_spike.py --skus /tmp/control_skus.csv --warp false
+            python spike/run_spike.py --skus /tmp/control_skus.csv --warp false --out spike/data/results-control.jsonl
           fi
 
       - name: Save results
@@ -137,7 +141,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          [ -f spike/data/results.jsonl ] && git add spike/data/results.jsonl
+          [ -f spike/data/results-control.jsonl ] && git add spike/data/results-control.jsonl
           git diff --staged --quiet || git commit -m "chore(spike): append control results [skip ci]"
           git pull --rebase origin main
           git push
