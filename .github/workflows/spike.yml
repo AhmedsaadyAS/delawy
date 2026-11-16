@@ -1,0 +1,183 @@
+# Noon Spike — 48-72h, hourly. Spike only: no Worker, no D1, no bot.
+# Answers with numbers: can we fetch a Noon Egypt product price by
+# link/SKU stably and accurately?
+name: Noon Spike
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      sku:
+        description: 'Single SKU to fetch (empty = all 50 SKUs)'
+        required: false
+        default: ''
+        type: string
+
+# One run at a time: both jobs append to spike/data/results.jsonl and
+# commit it, and the loser of a race would push a state that forgets
+# the other's records.
+concurrency:
+  group: noon-spike
+  cancel-in-progress: false
+
+jobs:
+  spike-warp:
+    name: Spike (WARP, 50 SKUs)
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r spike/requirements.txt
+
+      # WARP step copied from Vette1123/noon-deals-bot
+      # .github/workflows/bot.yml (MIT) — see THIRD_PARTY_NOTICES.md.
+      # Akamai blocks GitHub Actions datacenter IPs regardless of TLS
+      # fingerprint. Route noon.com traffic through Cloudflare WARP (free)
+      # to get a clean consumer-routed egress IP.
+      - name: Set up Cloudflare WARP
+        run: |
+          set -euo pipefail
+          curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg \
+            | sudo gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" \
+            | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
+          sudo apt-get update
+          sudo apt-get install -y cloudflare-warp
+          sudo systemctl start warp-svc
+          # warp-svc needs a moment before it'll accept CLI commands
+          for i in {1..15}; do
+            warp-cli --accept-tos status >/dev/null 2>&1 && break
+            sleep 1
+          done
+          warp-cli --accept-tos registration new
+          warp-cli --accept-tos mode proxy
+          warp-cli --accept-tos connect
+          # Wait for tunnel to come up
+          for i in {1..30}; do
+            if curl -fsS --socks5-hostname 127.0.0.1:40000 https://www.cloudflare.com/cdn-cgi/trace | grep -q "warp=on"; then
+              echo "WARP connected"
+              break
+            fi
+            sleep 2
+          done
+          # Fail fast if WARP never came up — we do NOT want to silently fall back
+          # to the datacenter IP and waste a run on Akamai 403s.
+          curl -fsS --socks5-hostname 127.0.0.1:40000 https://www.cloudflare.com/cdn-cgi/trace | grep -q "warp=on"
+
+      - name: Run spike (WARP)
+        env:
+          SCRAPER_PROXY: socks5h://127.0.0.1:40000
+        run: |
+          if [ -n "${{ inputs.sku }}" ]; then
+            python spike/run_spike.py --only-sku "${{ inputs.sku }}" --warp true
+          else
+            python spike/run_spike.py --warp true
+          fi
+
+      # always(): a run that fetched some records before dying must still
+      # commit them, or the next run re-fetches the same hour.
+      - name: Save results
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          [ -f spike/data/results.jsonl ] && git add spike/data/results.jsonl
+          git diff --staged --quiet || git commit -m "chore(spike): append hourly results [skip ci]"
+          git pull --rebase origin main
+          git push
+
+      - name: Upload parse-failure HTML (first 20 KB each)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spike-failures-warp
+          path: spike/data/failures
+          if-no-files-found: ignore
+
+  spike-control:
+    name: Spike control (no WARP, first 10 SKUs)
+    needs: spike-warp
+    if: always()
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r spike/requirements.txt
+
+      - name: Run spike control (no WARP, first 10 SKUs)
+        run: |
+          head -11 spike/skus.csv > /tmp/control_skus.csv
+          if [ -n "${{ inputs.sku }}" ]; then
+            python spike/run_spike.py --skus /tmp/control_skus.csv --only-sku "${{ inputs.sku }}" --warp false
+          else
+            python spike/run_spike.py --skus /tmp/control_skus.csv --warp false
+          fi
+
+      - name: Save results
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          [ -f spike/data/results.jsonl ] && git add spike/data/results.jsonl
+          git diff --staged --quiet || git commit -m "chore(spike): append control results [skip ci]"
+          git pull --rebase origin main
+          git push
+
+      - name: Upload parse-failure HTML (first 20 KB each)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spike-failures-control
+          path: spike/data/failures
+          if-no-files-found: ignore
+
+  publish-pages:
+    name: Publish public/ to GitHub Pages
+    needs: [spike-warp, spike-control]
+    if: always()
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      # Pages must already be enabled (Settings > Pages > Source:
+      # GitHub Actions). Creating the Pages site needs admin scope that
+      # GITHUB_TOKEN does not have.
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
