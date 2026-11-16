@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-11-16T14:54:39.773055Z",
+  "records_total": 0,
+  "success_rate": null,
+  "success_count": 0,
+  "akamai_count": 0,
+  "akamai_rate": null,
+  "http_429_count": 0,
+  "latency_ms": {
+    "median": null,
+    "p95": null,
+    "n": 0
+  },
+  "by_strategy": {},
+  "by_warp": {},
+  "by_parser": {},
+  "manual": null,
+  "dispatch": null,
+  "per_sku": [],
+  "first_ts": null,
+  "last_ts": null,
+  "decision": "pending",
+  "decision_reasons": [
+    "لا توجد سجلات بعد — أول Run لم ينتهِ أو لم يُنفَّذ."
+  ]
+}

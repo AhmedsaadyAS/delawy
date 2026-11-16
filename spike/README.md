@@ -62,6 +62,50 @@ python spike/run_spike.py   # full batch: 50 SKUs × A + B
 **Before the first run:** Settings → Pages → Source: GitHub Actions
 (the repo needs this once; the workflow cannot enable Pages itself).
 
+## المهام 4-7
+
+### 4. التحقق اليدوي من الدقة
+
+```bash
+python spike/compare_manual.py   # بعد ملء spike/manual_check.csv
+```
+
+`spike/manual_check.csv`: 15 SKU عشوائية × 3 جولات (45 صفاً). افتح كل
+لينك من المتصفح **بدون تسجيل دخول**، واملأ `checked_at` (UTC بصيغة ISO)
+و`price_in_browser` و`seller_in_browser` و`in_stock_in_browser`
+(true/false). القاعدة: أي فرق في السعر = سعر خاطئ، وفرق البائع = خطأ
+منفصل. المقارنة تتم مع أقرب سجل **أسلوب A** خلال 30 دقيقة (لينك الـ PDP
+نفسه — وليس البحث، لأن البحث قد يرجع عرضاً وبائعاً مختلفين).
+الناتج: `spike/data/manual_summary.json`.
+
+### 5. اختبار الفورية (workflow_dispatch)
+
+```bash
+export GH_TOKEN="..."   # fine-grained token، Actions: read and write
+python spike/dispatch_test.py --dry-run   # تحقق فقط، بدون إرسال
+python spike/dispatch_test.py             # 10 مرات، SKU واحد
+```
+
+يقيس زمن البدء والاكتمال لكل مرة، ويكتب `spike/data/dispatch.jsonl`.
+التوكن من متغير البيئة فقط، ولا يُحفظ في الريبو أبداً. لا تشغّله أثناء
+Run ساعي جارٍ إذا أردت أرقاماً نظيفة — مجموعة الـ concurrency الواحدة
+تضع الـ dispatch في طابور خلف الـ Run الجاري.
+
+### 6. اختبار جلب Worker (اختياري)
+
+انظر `spike/worker-probe/README.md`. يُحذف المجلد كاملاً بعد الـ Spike.
+
+### 7. صفحة النتائج وقرار Go/No-Go
+
+```bash
+python spike/report.py   # يكتب public/results.json و spike/SPIKE-RESULTS.md
+```
+
+الـ workflow يشغّل `report.py` في job النشر قبل رفع `public/`، فالصفحة
+تتحدث كل ساعة. القرار: Go إذا نسبة النجاح 90% فأكثر **و** عدد الأسعار
+الخاطئة صفر في العينة اليدوية، وإلا No-Go مع السبب. بدون سجلات أو بدون
+عينة يدوية، القرار "بانتظار البيانات" وليس Go.
+
 ## Go / No-Go (task 7)
 
 Go if success rate ≥ 90% **and** zero wrong prices in the manual sample;

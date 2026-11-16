@@ -3,17 +3,159 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spike نون — جارٍ التنفيذ</title>
+<title>نتائج Spike نون — delawy</title>
 <style>
-body{font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;max-width:640px;margin:0 auto;padding:24px 16px;line-height:1.8;color:#111}
-h1{font-size:1.4rem}
-a{color:#0b5fff}
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; margin: 0; padding: 16px; line-height: 1.7; color: #111; background: #fafafa; }
+  main { max-width: 880px; margin: 0 auto; }
+  h1 { font-size: 1.35rem; margin: 0 0 4px; }
+  h2 { font-size: 1.1rem; margin: 28px 0 8px; }
+  .muted { color: #555; font-size: .9rem; }
+  .banner { border-radius: 10px; padding: 14px 16px; margin: 16px 0; font-weight: 700; font-size: 1.15rem; }
+  .banner.go { background: #dcfce7; color: #14532d; }
+  .banner.no-go { background: #fee2e2; color: #7f1d1d; }
+  .banner.pending { background: #fef3c7; color: #78350f; }
+  .banner ul { margin: 8px 0 0; font-weight: 400; font-size: .95rem; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 16px 0; }
+  .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 12px; }
+  .card .label { font-size: .85rem; color: #555; }
+  .card .value { font-size: 1.5rem; font-weight: 800; }
+  .card .sub { font-size: .85rem; color: #555; }
+  table { width: 100%; border-collapse: collapse; background: #fff; }
+  th, td { border-bottom: 1px solid #eee; padding: 8px 10px; text-align: right; font-size: .92rem; }
+  th { background: #f3f4f6; }
+  tr.ok td:first-child { border-right: 4px solid #16a34a; }
+  tr.failed td:first-child { border-right: 4px solid #dc2626; }
+  tr.blocked td:first-child { border-right: 4px solid #d97706; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+  .filters button { border: 1px solid #ccc; background: #fff; border-radius: 20px; padding: 6px 14px; cursor: pointer; font: inherit; font-size: .9rem; }
+  .filters button.active { background: #111; color: #fff; border-color: #111; }
+  .pill { display: inline-block; border-radius: 12px; padding: 1px 10px; font-size: .85rem; }
+  .pill.ok { background: #dcfce7; color: #14532d; }
+  .pill.failed { background: #fee2e2; color: #7f1d1d; }
+  .pill.blocked { background: #fef3c7; color: #78350f; }
+  @media (max-width: 640px) {
+    body { padding: 12px; }
+    table, thead, tbody, th, td, tr { display: block; }
+    thead { display: none; }
+    tbody tr { border: 1px solid #e5e5e5; border-radius: 10px; margin-bottom: 10px; background: #fff; }
+    tbody td { border: none; padding: 4px 12px; }
+    tbody td::before { content: attr(data-label) ": "; font-weight: 700; color: #555; }
+    tbody td:first-child::before { content: ""; }
+    tbody td:first-child { font-weight: 800; font-size: 1rem; }
+  }
 </style>
 </head>
 <body>
-<h1>Spike نون — جارٍ التنفيذ</h1>
-<p>نجري الآن اختبار سحب سعر 50 منتجاً من نون مصر كل ساعة لمدة 48–72 ساعة، لقياس نسبة النجاح وتحديات Akamai ودقة الأسعار.</p>
-<p>صفحة النتائج الكاملة (بطاقات النجاح، مقارنة الأسلوبين، جدول كل SKU، ومؤشر Go/No-Go) ستُنشر هنا في المهمة 7، بعد أول تشغيل.</p>
-<p>النتائج الخام تُحفظ في <code>spike/data/results.jsonl</code> في الريبو <a href="https://github.com/AhmedsaadyAS/delawy">AhmedsaadyAS/delawy</a>.</p>
+<main>
+  <h1>نتائج Spike نون — هل نقدر نسحب سعر منتج نون بثبات ودقة؟</h1>
+  <p class="muted" id="meta">جارٍ تحميل النتائج…</p>
+  <div id="banner" class="banner pending">جارٍ تحميل النتائج…</div>
+
+  <div class="cards" id="cards"></div>
+
+  <h2>الأسلوب A مقابل B</h2>
+  <div id="by-strategy" class="muted">—</div>
+
+  <h2>WARP مقابل بدون WARP</h2>
+  <div id="by-warp" class="muted">—</div>
+
+  <h2>الفورية (workflow_dispatch)</h2>
+  <div id="dispatch" class="muted">لم يُختبر بعد — شغّل <code>spike/dispatch_test.py</code> محلياً.</div>
+
+  <h2>آخر سعر لكل SKU (الأسلوب A)</h2>
+  <div class="filters" id="filters">
+    <button data-filter="all" class="active">الكل</button>
+    <button data-filter="ok">ناجح</button>
+    <button data-filter="failed">فاشل</button>
+    <button data-filter="blocked">محجوب</button>
+  </div>
+  <table id="sku-table">
+    <thead><tr><th>SKU</th><th>آخر سعر</th><th>البائع</th><th>الحالة</th><th>آخر فحص</th></tr></thead>
+    <tbody id="sku-body"></tbody>
+  </table>
+  <p class="muted">المصدر: <code>spike/data/results.jsonl</code> في ريبو <a href="https://github.com/AhmedsaadyAS/delawy">AhmedsaadyAS/delawy</a>. القرار: Go إذا نسبة النجاح 90% فأكثر وعدد الأسعار الخاطئة صفر في العينة اليدوية، وإلا No-Go مع السبب.</p>
+</main>
+<script>
+(function () {
+  var STATUS_AR = { ok: "ناجح", failed: "فاشل", blocked: "محجوب" };
+  function pct(v) { return v === null || v === undefined ? "—" : v + "%"; }
+  function money(v) { return v === null || v === undefined ? "—" : Number(v).toLocaleString("en-EG") + " ج.م"; }
+
+  function render(data) {
+    document.getElementById("meta").textContent =
+      "آخر تحديث: " + (data.generated_at || "—") + " — السجلات: " + data.records_total +
+      (data.first_ts ? " (من " + data.first_ts + " إلى " + data.last_ts + ")" : "");
+
+    var banner = document.getElementById("banner");
+    var label = { go: "✅ Go — نقدر نسحب أسعار نون بثبات ودقة",
+                  "no-go": "❌ No-Go — لا نكمل في مسار نون التلقائي",
+                  pending: "⏳ بانتظار البيانات — القرار لم يُحسم بعد" }[data.decision] || "⏳ بانتظار البيانات";
+    banner.className = "banner " + data.decision;
+    banner.innerHTML = label + (data.decision_reasons && data.decision_reasons.length
+      ? "<ul>" + data.decision_reasons.map(function (r) { return "<li>" + r + "</li>"; }).join("") + "</ul>" : "");
+
+    var manual = data.manual;
+    var cards = [
+      { label: "نسبة النجاح", value: pct(data.success_rate), sub: data.success_count + " / " + data.records_total + " سجل" },
+      { label: "تحديات Akamai", value: pct(data.akamai_rate), sub: data.akamai_count + " سجل — HTTP 429: " + data.http_429_count },
+      { label: "الأسعار الخاطئة (يدوي)", value: manual ? manual.wrong_prices : "—", sub: manual ? manual.matched + " مطابَقة من " + manual.filled + " صف" : "لا توجد عينة بعد" },
+      { label: "زمن الاستجابة (median)", value: data.latency_ms.median === null ? "—" : Math.round(data.latency_ms.median) + "ms", sub: "p95: " + (data.latency_ms.p95 === null ? "—" : Math.round(data.latency_ms.p95) + "ms") + " (n=" + data.latency_ms.n + ")" },
+    ];
+    document.getElementById("cards").innerHTML = cards.map(function (c) {
+      return '<div class="card"><div class="label">' + c.label + '</div><div class="value">' + c.value + '</div><div class="sub">' + c.sub + "</div></div>";
+    }).join("");
+
+    function groupHtml(groups, nameFn) {
+      var keys = Object.keys(groups || {});
+      if (!keys.length) return "—";
+      return "<table><thead><tr><th></th><th>السجلات</th><th>النجاح</th><th>Akamai</th></tr></thead><tbody>" +
+        keys.map(function (k) {
+          var g = groups[k];
+          return "<tr><td>" + nameFn(k) + "</td><td>" + g.records + "</td><td>" + pct(g.success_rate) + "</td><td>" + pct(g.akamai_rate) + "</td></tr>";
+        }).join("") + "</tbody></table>";
+    }
+    document.getElementById("by-strategy").innerHTML = groupHtml(data.by_strategy, function (k) { return "الأسلوب " + k; });
+    document.getElementById("by-warp").innerHTML = groupHtml(data.by_warp, function (k) { return k === "True" ? "مع WARP" : k === "False" ? "بدون WARP" : k; });
+    if (data.dispatch) {
+      document.getElementById("dispatch").textContent =
+        "عدد مرات الاختبار: " + data.dispatch.runs + " — median للبدء: " + data.dispatch.median_time_to_start_s +
+        "s، median للاكتمال: " + data.dispatch.median_time_to_complete_s + "s.";
+    }
+
+    var rows = data.per_sku || [];
+    var currentFilter = "all";
+    function draw() {
+      var body = document.getElementById("sku-body");
+      var shown = rows.filter(function (r) { return currentFilter === "all" || r.status === currentFilter; });
+      if (!shown.length) { body.innerHTML = '<tr><td colspan="5">لا توجد نتائج بعد — أول Run لم ينتهِ.</td></tr>'; return; }
+      body.innerHTML = shown.map(function (r) {
+        return '<tr class="' + r.status + '">' +
+          "<td data-label='SKU'>" + r.sku + "</td>" +
+          "<td data-label='آخر سعر'>" + money(r.last_price) + "</td>" +
+          "<td data-label='البائع'>" + (r.seller || "—") + "</td>" +
+          '<td data-label="الحالة"><span class="pill ' + r.status + '">' + STATUS_AR[r.status] + "</span></td>" +
+          "<td data-label='آخر فحص'>" + (r.ts || "—") + "</td></tr>";
+      }).join("");
+    }
+    document.getElementById("filters").addEventListener("click", function (e) {
+      var btn = e.target.closest("button");
+      if (!btn) return;
+      currentFilter = btn.getAttribute("data-filter");
+      document.querySelectorAll("#filters button").forEach(function (b) { b.classList.toggle("active", b === btn); });
+      draw();
+    });
+    draw();
+  }
+
+  fetch("results.json", { cache: "no-store" })
+    .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(render)
+    .catch(function () {
+      document.getElementById("meta").textContent = "لا توجد نتائج بعد — أول Run جارٍ أو لم يُنفَّذ.";
+      document.getElementById("banner").textContent = "⏳ بانتظار البيانات — أول Run لم ينتهِ بعد.";
+    });
+})();
+</script>
 </body>
 </html>
