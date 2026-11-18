@@ -21,15 +21,16 @@ database_id = "00000000-0000-0000-0000-000000000000"
 migrations_dir = "migrations"
 
 # --- Staging: separate Worker + separate D1 database. -----------------------
-# Created only after user approval:
+# Created 2026-11-18 after user approval:
 #   wrangler d1 create delawy-staging-db
-# The returned database_id replaces the placeholder below (same UUID shape
-# is used here only so local `--env staging --local` keeps working).
+#   -> database_id a40b689a-c47a-45fb-a374-8f2de8759dfd (region ENAM)
+# The top-level config keeps its placeholder; only [env.staging] points at
+# a real remote database.
 [env.staging]
 name = "delawy-staging"
 
 [[env.staging.d1_databases]]
 binding = "DB"
 database_name = "delawy-staging-db"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "a40b689a-c47a-45fb-a374-8f2de8759dfd"
 migrations_dir = "migrations"
