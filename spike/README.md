@@ -1,5 +1,14 @@
 # Spike — Noon Single-Product Fetcher (48–72h)
 
+> **CLOSED — 2026-11-18 (user decision).** Final decision: **Go, on the WARP path only.**
+> 5 runs, 580 records (500 WARP + 80 control): WARP 500/500 = 100% success,
+> control 64/80 = 80% (HTTP 403 Access Denied on blocking days, `akamai_challenge=false`),
+> 0 Akamai challenges, 0 HTTP 429. Manual accuracy check 28/28 rows matched
+> (rounds 1–2; round 3 skipped by user decision). Next step: `SCHEMA.md` (Schema v2)
+> → `POST /api/ingest/noon`. Dispatch test and Worker edge probe were not run —
+> closed with the Spike. The hourly workflow should be disabled
+> (Actions → Noon Spike → Disable workflow) so no more runs append data.
+
 > Spike only. No Worker, no D1, no Telegram bot, no feature outside this Spike.
 > Question to answer with numbers: can we fetch a Noon Egypt product's
 > price by link/SKU stably and accurately?
