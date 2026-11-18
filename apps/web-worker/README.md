@@ -125,8 +125,9 @@ JSON-LD مفيهوش صورة. الـ Worker بيخزن الرابط بس — م
 
 - Worker باسم **`delawy-staging`** (قسم `[env.staging]` في `wrangler.toml`).
 - قاعدة D1 منفصلة باسم **`delawy-staging-db`** — مفيش أي أمر بعيد
-  يستهدف القاعدة المحلية أو أي قاعدة تانية بالخطأ، لأن كل سكربت بعيد
-  بيحمل `--env staging --remote` صراحةً.
+  يستهدف القاعدة المحلية أو أي قاعدة تانية بالخطأ، لأن كل سكربت D1 بعيد
+  بيحمل `--env staging --remote` صراحةً، وسكربت النشر بيحمل
+  `--env staging` فقط (النشر بلا `--remote`).
 - **مفيش tokens أو secrets في الملفات أو الـ commits** — الدخول لـ
   Cloudflare بيتم بتوكن API محفوظ في الموصل `custom.cloudflare`، وكل أوامر
   wrangler البعيدة بتتشغل عن طريق `wrangler-cloudflare.py` (بيجيب بديل
@@ -156,9 +157,10 @@ npm run deploy:staging                           # نشر delawy-staging
 بيقرأ `spike/skus.csv` و`spike/data/results.jsonl` و`seed/removed-skus.csv`
 وبس.
 
-**قاعدة أمان:** متشغّلش أبداً `wrangler deploy` أو `d1 execute` أو
-`d1 migrations apply` من غير `--env staging --remote` (أو `--local`) —
-الإعداد الافتراضي فيه placeholder ومفيش قاعدة remote حقيقية مربوطة بيه.
+**قاعدة أمان:** متشغّلش أبداً `d1 execute` أو `d1 migrations apply`
+من غير `--env staging --remote` (أو `--local`)، ولا `wrangler deploy`
+من غير `--env staging` — لا تعمّم `--remote` على أمر النشر. الإعداد
+الافتراضي فيه placeholder ومفيش قاعدة remote حقيقية مربوطة بيه.
 
 ## ما لم يُنفَّذ (عمداً)
 

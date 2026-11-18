@@ -30,45 +30,55 @@
 
 ## جداول D1
 
-### `store_products` — المنتجات المتتبعة
+### `store_products` — المنتجات المتتبعة (كما نفذته migration 0001 + 0002)
 
 | العمود | النوع | ملاحظة |
 |---|---|---|
-| `sku` | TEXT PK | SKU بتاع نون |
+| `id` | INTEGER PK | معرّف داخلي، يُستخدم في الـ API والروابط |
 | `store` | TEXT | `'noon'` في الـ MVP |
+| `external_id` | TEXT | SKU بتاع نون؛ UNIQUE(`store`, `external_id`) |
 | `slug` | TEXT | للروابط |
 | `name` | TEXT | |
 | `brand` | TEXT | |
 | `category` | TEXT | |
 | `url` | TEXT | رابط الـ PDP |
 | `offer_code` | TEXT | كود العرض المثبّت (من الـ Spike) |
-| `current_price` | REAL | يُحدَّث **بس عند تغيّر السعر** |
-| `current_original_price` | REAL | |
+| `current_price_minor` | INTEGER | السعر الحالي بالقروش؛ يُحدَّث **بس عند تغيّر السعر** |
+| `current_original_price_minor` | INTEGER | بالقروش |
+| `currency` | TEXT | `'EGP'` دائماً في الـ MVP |
 | `current_seller` | TEXT | |
-| `in_stock` | INTEGER | 0/1 |
-| `price_updated_at` | TEXT | وقت آخر تغيّر سعر (مش وقت آخر فحص) |
-| `ema_30d` | REAL | متوسط 30 يوم موزون زمنياً، يُحدَّث عند تغيّر السعر |
-| `ema_updated_at` | TEXT | |
-| `active` | INTEGER | 0/1 — المنتج لسه في نطاق التتبع؟ |
-| `discovered_via` | TEXT | `spike` / `user_link` |
+| `in_stock` | INTEGER | 0/1، وقد يكون NULL (غير معروف) |
+| `price_updated_at` | TEXT | وقت آخر تغيّر سعر (**مش وقت آخر فحص**) |
 | `first_seen_at` | TEXT | |
+| `last_successful_check_at` | TEXT | وقت آخر قراءة ناجحة لنفس المنتج (تبسيط v0.1.0 الموثق — يُحدَّث مع كل نجاح) |
+| `active` | INTEGER | 0/1 — المنتج لسه في نطاق التتبع؟ |
+| `image_url` | TEXT | من migration 0002؛ NULL تعني بلا صورة بعد |
+
+لا عمود `ema_30d` مخزّن — الـ EMA يُحسب عند القراءة. لا خلط بين
+`id` الداخلي و`external_id` الخاص بالمتجر.
 
 ### `price_points` — تاريخ الأسعار (نقطة لكل تغيّر سعر)
 
 | العمود | النوع | ملاحظة |
 |---|---|---|
-| `sku` | TEXT | FK → store_products |
+| `id` | INTEGER PK | |
+| `product_id` | INTEGER FK | → store_products(id) |
 | `ts` | TEXT | وقت الرصد (ISO 8601 UTC) |
-| `price` / `original_price` | REAL | |
+| `price_minor` / `original_price_minor` | INTEGER | بالقروش |
+| `currency` | TEXT | `'EGP'` |
 | `seller` | TEXT | |
 | `in_stock` | INTEGER | 0/1 |
-| `run_id` | INTEGER | FK → poll_runs |
-| PRIMARY KEY (`sku`, `ts`) | | |
+| `run_id` | INTEGER FK | → poll_runs(id) |
+| `source` | TEXT | `'spike_run'` افتراضياً؛ `'sku_list'` لنقطة القائمة الأولى |
+| UNIQUE (`product_id`, `ts`) | | + فهرس (`product_id`, `ts`) |
 
-- **الكتابة بس عند تغيّر السعر** (نفس قاعدة D1) — منتج سعره ثابت لا يكتب أي صف.
+- **الكتابة بس عند تغيّر السعر أو البائع أو التوفر** (نفس قاعدة D1) —
+  نقطة أولى ثم تغيّر فقط؛ منتج سعره ثابت لا يكتب أي صف.
 - ميزانية الكتابة: D1 المجاني 100,000 صف/يوم؛ تغيّرات الأسعار نادرة (في الـ Spike:
   4 من 50 SKU بس غيّروا سعرهم في 6 تشغيلات)، فالجدول ده رخيص جداً.
 - الـ EMA وحالة الجودة والرسم البياني كلها تُحسب من هنا — لا KV إطلاقاً.
+- **لا تُستخدم نقطة `sku_list` في إثبات جودة العرض أو تاريخ الرصد المؤهل** —
+  هي سعر قائمة أولي، لا رصد ناجح.
 
 ### `poll_runs` — سجل دفعات الفحص (نبضة الحداثة)
 
@@ -105,6 +115,16 @@
 بدون الجدول ده، `poll_runs` لوحده بيعتبر SKU فشل في الدفعة "حديثاً" لمجرد إن
 الدفعة نفسها نجحت جزئياً.
 
+## ثلاثة أبعاد مستقلة (لا تخلط بينها)
+
+1. **المصدر:** سعر قائمة (`sku_list`) أو رصد ناجح (`spike_run`).
+2. **كفاية التاريخ:** `unproven` (أقل من 7 أيام) أو مؤهل للتقييم.
+3. **الحداثة:** آخر نجاح، وحالة أحدث محاولة إذا كانت معلومة.
+
+لا تعني `verified` أن السعر حديث الآن؛ ولا يعني `unproven` أنه غير
+متحقق. الحقلان الحاليان `verified` و`price_source` يبقيان متوافقين
+حتى اعتماد انتقال موثق.
+
 ### `ingest_nonces` — منع إعادة إرسال الـ Ingest
 
 | العمود | النوع | ملاحظة |
@@ -113,54 +133,31 @@
 | `ts` | TEXT | وقت الاستلام |
 | `expires_at` | TEXT | `ts + 5 min` — تنظيف يومي بـ `DELETE` |
 
-### `users` + `user_identities` — الحسابات (بدون باسورد)
+- حجز nonce **ذري** — يمنع طلبين متزامنين من استخدام نفس الـ nonce.
+- الاحتفاظ يغطي كل مدة صلاحية التوقيع، بما فيها الطابع المستقبلي
+  المسموح (±5 دقائق).
 
-```sql
-CREATE TABLE users (
-  id TEXT PRIMARY KEY,          -- uuid
-  created_at TEXT NOT NULL,
-  last_login_at TEXT
-);
+### المرحلة C — كيانات مقترحة، ليست SQL منفَّذاً
 
-CREATE TABLE user_identities (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id TEXT NOT NULL REFERENCES users(id),
-  provider TEXT NOT NULL,       -- 'telegram' | 'email'
-  provider_id TEXT NOT NULL,    -- chat id أو الإيميل
-  created_at TEXT NOT NULL,
-  UNIQUE (provider, provider_id)
-);
-```
+> **مقترح للمراجعة، لا migration معتمدة.** الأسماء التفصيلية والجلسات
+> والتسليم بديل تصميمي — يُعتمد قبل أي migration في المرحلة C.
+> قنوات جديدة لا تغيّر هوية المستخدم أو الحدث الأساسي.
 
-### `tracked_products` — ما يتابعه كل مستخدم (حد 3 منتجات، زي AzTracker)
+| الكيان | المسؤولية |
+|---|---|
+| `users` | هوية الحساب وحالته |
+| `user_identities` | `provider`/`provider_id` فريدان وربطهما بالمستخدم (بلا باسورد) |
+| `sessions` | جلسات محدودة العمر قابلة للإبطال |
+| `auth_challenges` | OTP أو رابط استخدام واحد، انتهاء وحد محاولات؛ لا رمز خام |
+| `tracked_products` | `user_id`/`product_id` و`target_price_minor` و`smart_target` و`state` |
+| `notification_events` | الحدث المنطقي ومفتاح منع التكرار |
+| `notification_deliveries` | القناة والحالة والمحاولات والوقت التالي ومعرّف المزود |
 
-| العمود | النوع | ملاحظة |
-|---|---|---|
-| `id` | INTEGER PK AUTOINCREMENT | |
-| `user_id` | TEXT FK | |
-| `sku` | TEXT FK → store_products | |
-| `target_price` | REAL NULL | السعر المستهدف (فارغ = تنبيه ذكي بس) |
-| `smart_target` | INTEGER | 0/1 — تنبيه عند أي عرض "ساخن" |
-| `state` | TEXT | `armed` / `triggered` / `paused` / `disabled` |
-| `created_at` | TEXT | |
-| `triggered_at` | TEXT NULL | |
-| `last_notified_at` | TEXT NULL | |
-| UNIQUE (`user_id`, `sku`) | | |
-
-الحد 3 منتجات/مستخدم يُفرض في منطق التطبيق (رفض إضافة رابع برسالة واضحة)،
-مش بقيد قاعدة بيانات.
-
-### `alerts_log` — سجل التنبيهات المُرسلة
-
-| العمود | النوع | ملاحظة |
-|---|---|---|
-| `id` | INTEGER PK AUTOINCREMENT | |
-| `user_id` / `sku` | TEXT | |
-| `type` | TEXT | `price_drop` / `back_in_stock` |
-| `old_price` / `new_price` | REAL | |
-| `state` | TEXT | `sent` / `failed` |
-| `channel` | TEXT | `telegram` / `email` / `in_app` |
-| `sent_at` | TEXT | |
+- UNIQUE(`user_id`, `product_id`) للتتبع.
+- **فرض حد 3 يجب أن ينجح تحت التزامن** — لا عدّ ثم إدخال غير محميين.
+- تُحدَّد سياسة احتساب `paused`/`disabled` ضمن الحد قبل التنفيذ؛
+  الحذف يحرر خانة.
+- آلة حالات التنبيه `armed / triggered / paused / disabled` + هستيريسيس (O14).
 
 **الإيميل: Resend** (الباقة المجانية، أرقامها اتأكدت 2026-11-18 من صفحة الأسعار
 ومراجعات نوفمبر 2026): **3,000 إيميل/شهر، بحد 100/يوم، سقف صلب بلا overage**
@@ -172,13 +169,17 @@ CREATE TABLE user_identities (
 
 | العمود | النوع | ملاحظة |
 |---|---|---|
-| `code` | TEXT PK | |
+| `id` | INTEGER PK | هوية داخلية |
+| `code` | TEXT | نص الكود — **لا يُفترض فريداً عبر جميع المتاجر** |
 | `store` | TEXT | |
 | `title` | TEXT | |
+| `terms` | TEXT | شروط الاستخدام |
 | `discount_pct` | REAL | |
 | `verified_at` | TEXT | تاريخ آخر تأكيد شغال |
 | `expires_at` | TEXT NULL | |
 | `active` | INTEGER | |
+
+أي قيمة مالية بالقروش.
 
 ## جودة العرض — 5 حالات (مشتقة عند القراءة، مش مخزنة)
 
@@ -200,6 +201,13 @@ CREATE TABLE user_identities (
 و30% بيعدّي 25، فهو مش انتقائي. ومثال حي: باور بانك Anker (N70120304V)
 بـ 3,140 مقابل 10,000 مشطوب (-69%) — غالباً سعر أصلي منفوخ. **الإشارة الحقيقية
 هي النزول عن الـ EMA** بعد ما يتجمع تاريخ.
+
+- الـ EMA مشتق عند القراءة في التنفيذ الحالي؛ لا عمود `ema_30d` مخزّن حالياً.
+- يُختبر تساوي السعر مع المتوسط والحدود اللوغاريتمية والأوقات المكررة.
+- الرسم يحتاج نقطة الحالة عند بداية النافذة إن كانت مرصودة قبلها، مع
+  تمييز ذلك عن اختراع قراءة في وقت لم يحدث فيه فحص.
+- غياب القياسات أثناء انقطاع طويل لا يثبت أن السعر ظل ثابتاً؛ سياسة
+  الفجوات والبيانات القديمة تُعتمد قبل استخدام التقييم في التنبيهات (O14).
 
 ## عقد `POST /api/ingest/noon`
 
@@ -261,6 +269,27 @@ CREATE TABLE user_identities (
    مع `reason` المناسب.
 8. الرد: `{accepted, skipped, failed: [{sku, reason}], alerts_fired: [...]}` —
    قبول جزئي، والمرسل يعيد بس السجلات الفاشلة.
+
+**قواعد إضافية (قبل التنفيذ):**
+- الرصد المقبول للسعر: `strategy=A` و`warp=true` وHTTP 200 و`parse_ok=true`،
+  وهوية ووقت وسعر صالحون. سجل الفشل يسمح بغياب السعر ويسجّل سبب الفشل.
+- الصور الاختيارية لا تجعل فشل السعر نجاحاً، ولا تحذف صورة بسبب حقل فارغ.
+- المنتج الجديد يحتاج metadata صالحة؛ لا يُصنع اسم أو URL مختلق من SKU وحده.
+- التحقق على البايتات الأصلية قبل إعادة serialization؛ وحد مستقل لحجم
+  الجسم يُحدَّد قبل التنفيذ.
+- هوية run وسجل مستقرة تمنع التكرار بعد nonce جديد أو إعادة محاولة جزئية؛
+  تعريف صريح لعدادات الدفعة حتى لا تتضاعف مع retry؛ السعر القديم لا يغطي
+  الأحدث؛ تعارض سجلين لنفس الوقت يُعالج بسياسة معلنة.
+
+**القبول الجزئي — مقترح O12 يحتاج اعتماداً:**
+- 401 للتوقيع أو الطابع غير المقبولين؛ 409 لتكرار nonce مع معالجة ذرية؛
+  400 لجسم أو run غير صالحين؛ 413 لتجاوز الحد.
+- الطلب السليم يعالج كل سجل؛ Strategy B سبب رفض سجل، لا تعطيل بقية الدفعة.
+- الاستجابة المقترحة تفصل applied وduplicates وrejected وretryable_errors.
+- سجل فشل الجلب المحفوظ بنجاح ليس خطأ معالجة يُعاد إرساله بلا نهاية؛
+  تُعاد أخطاء المعالجة المؤقتة فقط، بنفس هوية الحدث وnonce وتوقيع جديدين.
+- شكل JSON النهائي وسياسة الـ atomicity والعدادات تُثبَّت باختبارات عقد
+  قبل الربط. لا تُنسب دلالات الاستجابة الجديدة إلى API منفَّذ حالياً.
 
 ## الترحيل من بيانات الـ Spike (مرة واحدة)
 
