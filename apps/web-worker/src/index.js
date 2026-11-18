@@ -47,6 +47,7 @@ function productJson(p, deal, pointsCount) {
     brand: p.brand,
     category: p.category,
     url: p.url,
+    image_url: p.image_url || null,
     offer_code: p.offer_code,
     current_price_minor: p.current_price_minor,
     current_price: fromMinor(p.current_price_minor),

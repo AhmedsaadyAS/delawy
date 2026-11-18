@@ -4,6 +4,8 @@
 //   records      — parsed spike/data/results.jsonl rows (unified Spike record)
 //   skus         — current spike/skus.csv rows (active = 1)
 //   removedSkus  — seed/removed-skus.csv rows: SKUs that left skus.csv (active = 0)
+//   images       — seed/sku-images.json map sku -> image_url (backfill fallback;
+//                  a record's own image_url wins over the mapping)
 //
 // Rules (from the task brief):
 //   - Strategy A only; parse_ok=true and HTTP 200 only; warp=true only
@@ -104,7 +106,7 @@ function failureReason(record) {
   return 'timeout';
 }
 
-export function buildSeed({ records, skus, removedSkus }) {
+export function buildSeed({ records, skus, removedSkus, images = {} }) {
   const rejected = {};
   const reject = (reason) => {
     rejected[reason] = (rejected[reason] || 0) + 1;
@@ -235,6 +237,10 @@ export function buildSeed({ records, skus, removedSkus }) {
 
   for (const [sku, m] of meta) {
     const recs = bySku.get(sku) || [];
+    // Image: latest non-null image_url from accepted records, else the
+    // one-off backfill mapping, else null (UI shows a placeholder).
+    const recordImage =
+      recs.reduce((acc, r) => r.image_url || acc, null) || images[sku] || null;
     if (recs.length === 0) {
       // Product never read: first point from the sku-list listing price.
       // If there is no listing price either, there is nothing honest to import.
@@ -264,6 +270,7 @@ export function buildSeed({ records, skus, removedSkus }) {
         category: m.category,
         url: m.url,
         offer_code: m.offer_code,
+        image_url: recordImage,
         current_price_minor: priceMinor,
         current_original_price_minor: toMinor(m.original_price),
         currency: 'EGP',
@@ -311,6 +318,7 @@ export function buildSeed({ records, skus, removedSkus }) {
       category: m.category,
       url: m.url,
       offer_code: m.offer_code,
+      image_url: recordImage,
       current_price_minor: toMinor(latest.price),
       current_original_price_minor: toMinor(latest.original_price),
       currency: 'EGP',
@@ -342,6 +350,7 @@ export function buildSeed({ records, skus, removedSkus }) {
       inactive: products.filter((p) => p.active === 0).length,
       with_readings: products.filter((p) => p.last_successful_check_at !== null).length,
       from_sku_list_only: products.filter((p) => p.last_successful_check_at === null).length,
+      with_image: products.filter((p) => p.image_url).length,
     },
     points: {
       total: points.length,
@@ -377,8 +386,18 @@ export function toSql({ products, points, runs, failureRows }) {
   }
   for (const p of products) {
     out.push(
-      `INSERT INTO store_products (store, external_id, slug, name, brand, category, url, offer_code, current_price_minor, current_original_price_minor, currency, current_seller, in_stock, price_updated_at, first_seen_at, last_successful_check_at, active) VALUES (${sqlStr(p.store)}, ${sqlStr(p.external_id)}, ${sqlStr(p.slug)}, ${sqlStr(p.name)}, ${sqlStr(p.brand)}, ${sqlStr(p.category)}, ${sqlStr(p.url)}, ${sqlStr(p.offer_code)}, ${sqlInt(p.current_price_minor)}, ${sqlInt(p.current_original_price_minor)}, ${sqlStr(p.currency)}, ${sqlStr(p.current_seller)}, ${sqlInt(p.in_stock)}, ${sqlStr(p.price_updated_at)}, ${sqlStr(p.first_seen_at)}, ${sqlStr(p.last_successful_check_at)}, ${p.active}) ON CONFLICT(store, external_id) DO UPDATE SET name=excluded.name, url=excluded.url, offer_code=excluded.offer_code, current_price_minor=excluded.current_price_minor, current_original_price_minor=excluded.current_original_price_minor, current_seller=excluded.current_seller, in_stock=excluded.in_stock, price_updated_at=excluded.price_updated_at, last_successful_check_at=excluded.last_successful_check_at, active=excluded.active WHERE excluded.last_successful_check_at IS NOT NULL AND (store_products.last_successful_check_at IS NULL OR excluded.last_successful_check_at >= store_products.last_successful_check_at);`,
+      `INSERT INTO store_products (store, external_id, slug, name, brand, category, url, offer_code, image_url, current_price_minor, current_original_price_minor, currency, current_seller, in_stock, price_updated_at, first_seen_at, last_successful_check_at, active) VALUES (${sqlStr(p.store)}, ${sqlStr(p.external_id)}, ${sqlStr(p.slug)}, ${sqlStr(p.name)}, ${sqlStr(p.brand)}, ${sqlStr(p.category)}, ${sqlStr(p.url)}, ${sqlStr(p.offer_code)}, ${sqlStr(p.image_url)}, ${sqlInt(p.current_price_minor)}, ${sqlInt(p.current_original_price_minor)}, ${sqlStr(p.currency)}, ${sqlStr(p.current_seller)}, ${sqlInt(p.in_stock)}, ${sqlStr(p.price_updated_at)}, ${sqlStr(p.first_seen_at)}, ${sqlStr(p.last_successful_check_at)}, ${p.active}) ON CONFLICT(store, external_id) DO UPDATE SET name=excluded.name, url=excluded.url, offer_code=excluded.offer_code, image_url=excluded.image_url, current_price_minor=excluded.current_price_minor, current_original_price_minor=excluded.current_original_price_minor, current_seller=excluded.current_seller, in_stock=excluded.in_stock, price_updated_at=excluded.price_updated_at, last_successful_check_at=excluded.last_successful_check_at, active=excluded.active WHERE excluded.last_successful_check_at IS NOT NULL AND (store_products.last_successful_check_at IS NULL OR excluded.last_successful_check_at >= store_products.last_successful_check_at);`,
     );
+  }
+  // Fill a missing image without touching the no-regression guard above:
+  // sku_list-only products never pass that guard (no successful check), so
+  // their first image arrives through this pass. Never overwrites an image.
+  for (const p of products) {
+    if (p.image_url) {
+      out.push(
+        `UPDATE store_products SET image_url=${sqlStr(p.image_url)} WHERE store='noon' AND external_id=${sqlStr(p.external_id)} AND image_url IS NULL;`,
+      );
+    }
   }
   for (const pt of points) {
     const productSub = `(SELECT id FROM store_products WHERE store='noon' AND external_id=${sqlStr(pt.sku)})`;

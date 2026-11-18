@@ -151,3 +151,33 @@ test('generated SQL is idempotent in shape', () => {
   // Same input -> same SQL (deterministic).
   assert.equal(sql, toSql(seed));
 });
+
+test('images: record image_url wins, mapping is the fallback, null when neither', () => {
+  const records = [
+    rec({ image_url: 'https://f.nooncdn.com/p/a.jpg' }),
+    rec({ sku: 'BBB222', price: 50000, original_price: 60000, seller: 'StoreB', image_url: null }),
+  ];
+  const seed = buildSeed({
+    records,
+    skus: parseCsv(SKUS_CSV),
+    removedSkus: parseCsv(REMOVED_CSV),
+    images: {
+      AAA111: 'https://f.nooncdn.com/p/mapping.jpg',
+      BBB222: 'https://f.nooncdn.com/p/b.jpg',
+      CCC333: 'https://f.nooncdn.com/p/c.jpg',
+    },
+  });
+  const a = seed.products.find((p) => p.external_id === 'AAA111');
+  assert.equal(a.image_url, 'https://f.nooncdn.com/p/a.jpg'); // record wins
+  const b = seed.products.find((p) => p.external_id === 'BBB222');
+  assert.equal(b.image_url, 'https://f.nooncdn.com/p/b.jpg'); // mapping fallback
+  const c = seed.products.find((p) => p.external_id === 'CCC333');
+  assert.equal(c.image_url, 'https://f.nooncdn.com/p/c.jpg'); // sku_list product via mapping
+  const d = seed.products.find((p) => p.external_id === 'DDD444');
+  assert.equal(d.image_url, null); // neither source -> null
+  assert.equal(seed.summary.products.with_image, 3);
+  const sql = toSql(seed);
+  assert.match(sql, /image_url/);
+  assert.match(sql, /UPDATE store_products SET image_url=/);
+  assert.equal(sql, toSql(seed)); // deterministic
+});

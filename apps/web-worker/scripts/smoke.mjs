@@ -91,6 +91,18 @@ await check('unverified product (sku_list) shows no EMA and no fake check time',
   assert(html.includes('متوسط 30 يوم (EMA)</div><div class="font-black text-lg">—</div>'), 'EMA box must show — for unverified product');
 });
 
+await check('products carry image URLs and the list renders them', async () => {
+  const page = await getJson('/api/products?page=1&limit=100');
+  const withImage = page.data.filter((p) => p.image_url);
+  assert(withImage.length >= 1, 'expected at least one product with image_url');
+  assert(
+    withImage[0].image_url.startsWith('https://f.nooncdn.com/'),
+    `image_url should be a Noon CDN URL, got ${withImage[0].image_url}`,
+  );
+  const html = await getHtml('/');
+  assert(html.includes('<img '), 'list page should render <img> tags');
+});
+
 await check('HTML list page renders', async () => {
   const html = await getHtml('/');
   assert(html.includes('ديلاوي'), 'missing brand');

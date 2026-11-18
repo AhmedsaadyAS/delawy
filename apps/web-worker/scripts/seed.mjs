@@ -5,6 +5,8 @@
 //   ../../spike/skus.csv             — current tracked set (active = 1)
 //   ../../spike/data/results.jsonl   — Spike price readings (WARP runs)
 //   ./seed/removed-skus.csv         — SKUs that left skus.csv (active = 0)
+//   ./seed/sku-images.json          — one-off image backfill (sku -> image_url);
+//                                     missing file is tolerated (images = {}).
 //
 // The SQL is applied by `npm run seed` via `wrangler d1 execute DB --local`.
 // Re-running is safe: products upsert with a no-regression guard, points
@@ -31,6 +33,12 @@ const resultsText = readFileSync(
   'utf-8',
 );
 const removedText = readFileSync(join(appDir, 'seed', 'removed-skus.csv'), 'utf-8');
+let images = {};
+try {
+  images = JSON.parse(readFileSync(join(appDir, 'seed', 'sku-images.json'), 'utf-8'));
+} catch {
+  images = {};
+}
 
 const records = resultsText
   .split('\n')
@@ -41,6 +49,7 @@ const seed = buildSeed({
   records,
   skus: parseCsv(skusText),
   removedSkus: parseCsv(removedText),
+  images,
 });
 
 mkdirSync(dirname(sqlPath), { recursive: true });

@@ -32,6 +32,14 @@ function brandCategory(p) {
   return [p.brand, p.category].filter(Boolean).join(' · ');
 }
 
+/** Product image, or a same-size placeholder when no image was captured. */
+function productImage(p, cls) {
+  if (p.image_url) {
+    return `<img src="${esc(p.image_url)}" alt="" loading="lazy" class="${cls} bg-white">`;
+  }
+  return `<div class="${cls} bg-gray-100 flex items-center justify-center text-gray-400 text-sm">لا توجد صورة</div>`;
+}
+
 export function dealBadge(state) {
   const cls = BADGE[state] || BADGE.unproven;
   return `<span class="inline-block rounded-full px-2 py-0.5 text-xs font-bold ${cls}">${esc(DEAL_LABELS[state] || state)}</span>`;
@@ -70,6 +78,7 @@ export function unverifiedBadge() {
 export function productCard(p, deal) {
   const pct = discountPct(p.current_price_minor, p.current_original_price_minor);
   return `<a href="/products/${p.id}" class="block bg-white rounded-xl shadow p-4 hover:shadow-md transition">
+  ${productImage(p, 'w-full h-44 object-contain rounded-lg mb-3')}
   <div class="flex items-start justify-between gap-2">
     <h2 class="font-bold leading-snug">${esc(p.name)}</h2>
     ${deal.verified ? dealBadge(deal.state) : unverifiedBadge()}
@@ -186,6 +195,7 @@ export function detailPage(p, deal, points, days) {
 <h1 class="text-2xl font-black mt-2 leading-snug">${esc(p.name)}</h1>
 <p class="text-gray-500 mt-1">${esc(brandCategory(p))}</p>
 <div class="mt-4 bg-white rounded-xl shadow p-4 flex flex-wrap items-center gap-4">
+  ${productImage(p, 'w-44 h-44 object-contain rounded-lg shrink-0')}
   <div>
     <div class="text-3xl font-black text-red-600">${formatEGP(p.current_price_minor)}</div>
     ${p.current_original_price_minor && pct !== null ? `<div class="text-gray-400 line-through">${formatEGP(p.current_original_price_minor)} <span class="text-green-600 font-bold no-underline">-${pct}%</span></div>` : ''}

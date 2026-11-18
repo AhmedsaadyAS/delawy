@@ -17,10 +17,12 @@ apps/web-worker/
   src/lib/pagination.js    تحليل ?page=&limit= و ?days=
   src/lib/html.js          صفحات HTML (عربي RTL) + رسم بياني SVG لتاريخ السعر
   migrations/0001_init.sql الجداول الأربعة لهذا المسار فقط
+  migrations/0002_add_image_url.sql عمود image_url في store_products
   scripts/seed-lib.mjs     منطق الاستيراد (pure — قابل للاختبار)
   scripts/seed.mjs         CLI يبني SQL الاستيراد + الملخص
   scripts/smoke.mjs        فحص الـ endpoints على خادم dev شغال
   seed/removed-skus.csv    بيانات SKUs خرجت من skus.csv (غير نشطة)
+  seed/sku-images.json     صور المنتجات (sku -> رابط Noon CDN) — ملء لمرة واحدة
   tests/                   اختبارات node:test
 ```
 
@@ -76,7 +78,21 @@ npm run smoke               # فحص الـ endpoints (يحتاج dev شغال)
 - إعادة التشغيل آمنة: upsert بحارس عدم التراجع، و`INSERT OR IGNORE` للنقاط
   والفشل، و`ON CONFLICT DO NOTHING` للدفعات.
 
-## سياسة الحداثة (تبسيط موثّق)
+## صور المنتجات
+
+صورة المنتج جاية من صفحة نون نفسها: الـ fetcher بيستخرج أول رابط من حقل
+`image` في JSON-LD (قائمة روابط `f.nooncdn.com`)، و`og:image` بديل لو
+JSON-LD مفيهوش صورة. الـ Worker بيخزن الرابط بس — مبيحمّلش الصورة ولا
+يعيد استضافتها، والصفحة بتعرضها مباشرة من CDN نون (`loading="lazy"`).
+
+- سجل الـ Spike فيه حقل `image_url` (أسلوب A بس) — والـ seed بياخد أحدث
+  صورة غير فارغة من السجلات، ولو مفيش بياخد من `seed/sku-images.json`
+  (ملء لمرة واحدة بسكربت `spike/backfill_images.py` — بيقرأ الـ PDP مرة
+  لكل SKU وبيكتب الملف ده بس، ومبيكتبش في `results.jsonl` أبداً).
+- لو مفيش صورة من أي مصدر، البطاقة وصفحة المنتج بيعرضوا خانة «لا توجد
+  صورة» بنفس المقاس بدل صورة مكسورة.
+- الـ API بيحمل `image_url` في كل منتج، والـ smoke بيتأكد أن فيه منتجات
+  بصور وأن صفحة القائمة فيها وسوم `<img>`.
 
 `store_products.last_successful_check_at` يتحدث مع كل قراءة ناجحة للمنتج.
 ده تبسيط متعمد للنسخة الصغيرة بدل تصميم استنتاج حداثة معقد من `poll_runs` +
@@ -112,12 +128,19 @@ npm run smoke               # فحص الـ endpoints (يحتاج dev شغال)
   يستهدف القاعدة المحلية أو أي قاعدة تانية بالخطأ، لأن كل سكربت بعيد
   بيحمل `--env staging --remote` صراحةً.
 - **مفيش tokens أو secrets في الملفات أو الـ commits** — الدخول لـ
-  Cloudflare بيتم بـ `wrangler login` من المتصفح، مش بلصق توكن.
+  Cloudflare بيتم بتوكن API محفوظ في الموصل `custom.cloudflare`، وكل أوامر
+  wrangler البعيدة بتتشغل عن طريق `wrangler-cloudflare.py` (بيجيب بديل
+  `hsurr:*` من المخزن الآمن وبيحطه في `CLOUDFLARE_API_TOKEN`) — التوكن
+  الحقيقي مبيظهرش في الشات ولا في الملفات أبداً. مسار `wrangler login`
+  (OAuth) اتجرّب واتساب لأن تسجيل الدخول من المتصفح تعطّل.
 - مفيش دومين مخصص — الرابط بيكون `*.workers.dev` اللي Cloudflare بتديه.
+  الـ subdomain بتاع الحساب هو `delawy`، والرابط الحي:
+  `https://delawy-staging.delawy.workers.dev` (اتنشر واتأكد شغال
+  2026-11-18).
 
 ```bash
-# بعد الموافقة الصريحة فقط — ولا خطوة من دي اتنفذت لسه:
-wrangler login                                   # لو مش مسجل دخول أصلاً (يفتح صفحة Cloudflare)
+# الخطوات دي اتنفذت على staging 2026-11-18 (بعد موافقة صريحة) — الترتيب:
+# التوكن اتحفظ في الموصل، وبعدين:
 wrangler d1 create delawy-staging-db             # إنشاء القاعدة، وبيطبع database_id
 # حط الـ database_id في wrangler.toml تحت [env.staging] بدل الـ placeholder
 npm run migrate:staging                          # تطبيق 0001 على delawy-staging-db
@@ -139,8 +162,8 @@ npm run deploy:staging                           # نشر delawy-staging
 
 ## ما لم يُنفَّذ (عمداً)
 
-- **لا نشر ولا migration على قاعدة remote** — يحتاج موافقة صريحة + `database_id`
-  حقيقي (الحالي placeholder للتشغيل المحلي فقط).
+- النشر على staging اتنفذ 2026-11-18 (الرابط فوق) — أي نشر أو migration
+  تاني على قاعدة remote يحتاج موافقة صريحة برضه.
 - لا نقل لـ scraper بايثون إلى الـ Worker — يظل منفصلاً.
 - لا KV لتاريخ الأسعار — التاريخ في D1 (`price_points`).
 - لا حسابات ولا تنبيهات ولا أكواد خصم في هذه المرحلة.

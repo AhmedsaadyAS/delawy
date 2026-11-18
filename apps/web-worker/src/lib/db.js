@@ -12,7 +12,7 @@ export async function listProducts(db, { active = 1, limit, offset }) {
   const { results } = await db
     .prepare(
       `SELECT id, store, external_id, slug, name, brand, category, url,
-              current_price_minor, current_original_price_minor, currency,
+              image_url, current_price_minor, current_original_price_minor, currency,
               current_seller, in_stock, price_updated_at,
               first_seen_at, last_successful_check_at, active
          FROM store_products
@@ -29,7 +29,7 @@ export async function getProduct(db, id) {
   return await db
     .prepare(
       `SELECT id, store, external_id, slug, name, brand, category, url,
-              current_price_minor, current_original_price_minor, currency,
+              image_url, current_price_minor, current_original_price_minor, currency,
               current_seller, in_stock, price_updated_at,
               first_seen_at, last_successful_check_at, active
          FROM store_products
