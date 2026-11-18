@@ -5,7 +5,9 @@ name: Noon Spike
 
 on:
   schedule:
-    - cron: '0 * * * *'
+    # Every 6 hours (was hourly): Spike closed 2026-11-18; runs continue only to
+    # build price history for the EMA until the ingest endpoint exists.
+    - cron: '0 */6 * * *'
   workflow_dispatch:
     inputs:
       sku:
