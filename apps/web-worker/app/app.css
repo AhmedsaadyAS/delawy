@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+/* ديلاوي — نظام بصري واحد: خلفية هادئة فاتحة، نص داكن، أخضر غامق كلون
+   أساسي واحد، حدود خفيفة، خط عربي واحد. بلا تدرجات ولا زجاج. */
+@theme {
+  --color-bg: #f7f8f7;
+  --color-surface: #ffffff;
+  --color-ink: #17211a;
+  --color-muted: #5b6b60;
+  --color-border: #dfe6df;
+  --color-primary: #14532d;
+  --color-primary-dark: #0b3d20;
+  --font-sans: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, Arial, sans-serif;
+}
+
+html {
+  color-scheme: light;
+}
+
+/* تركيز مرئي واضح لكل العناصر التفاعلية (لوحة مفاتيح). */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

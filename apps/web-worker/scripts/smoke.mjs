@@ -88,7 +88,13 @@ await check('unverified product (sku_list) shows no EMA and no fake check time',
   assert(unverified.last_successful_check_at === null, 'last_successful_check_at should be null');
   const html = await getHtml(`/products/${unverified.id}`);
   assert(html.includes('لم يُتحقق منه'), 'detail page missing unverified banner');
-  assert(html.includes('متوسط 30 يوم (EMA)</div><div class="font-black text-lg">—</div>'), 'EMA box must show — for unverified product');
+  // React SSR inserts <!-- --> separators between text and expressions.
+  const clean = html.replace(/<!-- -->/g, '');
+  assert(clean.includes('متوسط 30 يوم (EMA)'), 'detail page missing EMA box');
+  assert(
+    /متوسط 30 يوم \(EMA\)<\/div><div[^>]*>—</.test(clean),
+    'EMA box must show — for unverified product',
+  );
 });
 
 await check('products carry image URLs and the list renders them', async () => {

@@ -44,7 +44,7 @@
 - **Cloudflare Workers (ES6 JavaScript) + D1 + KV + Queues** — نفس معمارية AzTracker، لإعادة استخدام كوده.
   (KV + Queues في المعمارية الأصلية؛ تاريخ الأسعار في D1 بقرار مراجعة
   2026-11-18 — انظر `SCHEMA.md`.)
-- واجهة ويب مولّدة من الـ Worker بـ HTML / Tailwind، وليست React في الـ MVP.
+- واجهة ويب React Router v8 SSR على الـ Worker (قرار 2026-11-18 — غيّر «وليست React»)، Tailwind مبني ضمن المشروع؛ الباك إند Workers + D1 بلا تغيير.
 - **لا NestJS ولا Go في الـ MVP** — القراران في `DECISIONS.md` كانا من مشروع آخر، وتم تصحيحهما هنا.
 - Discovery Engine منفصل عن Tracking Engine، مع قاعدة بيانات وتنبيهات مشتركة.
 - حماية كتابات D1: لا تحديث لـ `last_checked_at` مع كل فحص. الكتابة فقط عند تغيّر السعر أو حدث تنبيه، + Heartbeat كل 24 ساعة للمنتجات النشطة فقط. جدول `poll_runs` — صف واحد لكل دفعة فحص، وليس KV.

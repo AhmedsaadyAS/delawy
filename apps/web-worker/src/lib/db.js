@@ -1,14 +1,45 @@
 // D1 queries for the read path. All prices come back as INTEGER minor units.
 
-export async function countProducts(db, { active = 1 } = {}) {
+/** Escape LIKE wildcards in a user search term. */
+export function escapeLike(value) {
+  return String(value).replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+}
+
+/**
+ * Shared WHERE builder for the product list filters. Filters are applied
+ * in SQL, before LIMIT/OFFSET, so pagination counts the filtered set.
+ * q: substring search over name/brand; category: exact match;
+ * inStock: 1 = in stock only, 0 = out of stock only (NULL = unknown,
+ * matches neither).
+ */
+function productWhere({ active = 1, q = null, category = null, inStock = null } = {}) {
+  const where = ['active = ?'];
+  const binds = [active];
+  if (q) {
+    const like = `%${escapeLike(q)}%`;
+    where.push(`(name LIKE ? ESCAPE '\\' OR brand LIKE ? ESCAPE '\\')`);
+    binds.push(like, like);
+  }
+  if (category) {
+    where.push('category = ?');
+    binds.push(category);
+  }
+  if (inStock === 1) where.push('in_stock = 1');
+  if (inStock === 0) where.push('in_stock = 0');
+  return { where: where.join(' AND '), binds };
+}
+
+export async function countProducts(db, opts = {}) {
+  const { where, binds } = productWhere(opts);
   const row = await db
-    .prepare('SELECT COUNT(*) AS n FROM store_products WHERE active = ?')
-    .bind(active)
+    .prepare(`SELECT COUNT(*) AS n FROM store_products WHERE ${where}`)
+    .bind(...binds)
     .first();
   return row ? row.n : 0;
 }
 
-export async function listProducts(db, { active = 1, limit, offset }) {
+export async function listProducts(db, { limit, offset, ...opts } = {}) {
+  const { where, binds } = productWhere(opts);
   const { results } = await db
     .prepare(
       `SELECT id, store, external_id, slug, name, brand, category, url,
@@ -16,13 +47,26 @@ export async function listProducts(db, { active = 1, limit, offset }) {
               current_seller, in_stock, price_updated_at,
               first_seen_at, last_successful_check_at, active
          FROM store_products
-        WHERE active = ?
+        WHERE ${where}
         ORDER BY id ASC
         LIMIT ? OFFSET ?`,
     )
-    .bind(active, limit, offset)
+    .bind(...binds, limit, offset)
     .all();
   return results || [];
+}
+
+/** Distinct non-empty categories of active products, for the filter list. */
+export async function listCategories(db, { active = 1 } = {}) {
+  const { results } = await db
+    .prepare(
+      `SELECT DISTINCT category FROM store_products
+        WHERE active = ? AND category IS NOT NULL AND category != ''
+        ORDER BY category ASC`,
+    )
+    .bind(active)
+    .all();
+  return (results || []).map((r) => r.category);
 }
 
 export async function getProduct(db, id) {

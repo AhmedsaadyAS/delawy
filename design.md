@@ -18,8 +18,9 @@ GitHub Actions (Spike, WARP) ──POST /api/ingest/noon (HMAC)──▶ Worker
                               HTML/API ← المستخدم (متصفح، موبايل أولاً)
 ```
 
-- **Cloudflare Workers (ES Modules JavaScript) + D1.** بلا React وبلا
-  NestJS/Go في الـ MVP؛ الواجهة HTML/Tailwind مولّدة من الـ Worker.
+- **Cloudflare Workers (ES Modules JavaScript) + D1.** الواجهة React
+  Router v8 SSR (قرار D21، 2026-11-18)؛ بلا NestJS/Go في الـ MVP؛
+  Tailwind مبني ضمن المشروع.
 - **لا KV لتاريخ الأسعار** — التاريخ في D1 (`price_points`) بقرار معتمد
   (KV: الـ TTL يتجدد عند الكتابة فقط، ولا transaction مع D1).
 - **Queues:** مذكورة في قرارات البدء كجزء من المعمارية، لكنها **ليست
@@ -40,10 +41,11 @@ GitHub Actions (Spike, WARP) ──POST /api/ingest/noon (HMAC)──▶ Worker
 
 ## الواجهة واللغة
 
-المعتمد الحالي HTML/Tailwind وJavaScript. لا React Router أو TypeScript
-تلقائياً — يحتاجان O11 وخطة أثر محددة. لا يُفترض أن توليد HTML وحده
-يضمن سرعة أو SEO — يُقاسان على التطبيق. Tailwind للإنتاج يُبنى ضمن
-المشروع إن كان يُستخدم Play CDN في النسخة التجريبية.
+المعتمد الحالي React Router v8 SSR (JavaScript) — قرار D21 في
+2026-11-18 غيّر الواجهة من HTML/Tailwind مولّد يدوياً. TypeScript لم
+يُعتمد — يظل مقترحاً مفتوحاً في O11 ويحتاج قراراً مستقلاً + خطة أثر.
+لا يُفترض أن توليد HTML وحده يضمن سرعة أو SEO — يُقاسان على التطبيق.
+Tailwind صار مبنياً ضمن المشروع (بدل Play CDN).
 
 ## المكونات
 

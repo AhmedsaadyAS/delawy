@@ -11,8 +11,13 @@
 # `wrangler d1 migrations apply` — the top-level config has no real database.
 
 name = "delawy-web"
-main = "src/index.js"
+main = "./workers/app.js"
 compatibility_date = "2026-11-18"
+
+# دخول الـ Worker هو workers/app.js (قالب Cloudflare الرسمي لـ React Router v8)
+# — يفوّض إلى React Router. بناء Vite ينتج أيضاً dist/delawy_web/
+# (العامل القابل للنشر مع wrangler.json مولّد). قبل أي `wrangler deploy`
+# شغّل `npm run build`. النشر خارج نطاق شريحة React الأولى.
 
 [[d1_databases]]
 binding = "DB"
