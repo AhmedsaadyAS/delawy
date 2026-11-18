@@ -1,13 +1,22 @@
 # Spike — Noon Single-Product Fetcher (48–72h)
 
 > **CLOSED — 2026-11-18 (user decision).** Final decision: **Go, on the WARP path only.**
-> 5 runs, 580 records (500 WARP + 80 control): WARP 500/500 = 100% success,
-> control 64/80 = 80% (HTTP 403 Access Denied on blocking days, `akamai_challenge=false`),
-> 0 Akamai challenges, 0 HTTP 429. Manual accuracy check 28/28 rows matched
-> (rounds 1–2; round 3 skipped by user decision). Next step: `SCHEMA.md` (Schema v2)
-> → `POST /api/ingest/noon`. Dispatch test and Worker edge probe were not run —
-> closed with the Spike. The hourly workflow should be disabled
-> (Actions → Noon Spike → Disable workflow) so no more runs append data.
+> 5 runs, 580 records (500 WARP + 80 control) **at close time (10:19 EET)**:
+> WARP 500/500 = 100% success, control 64/80 = 80% (HTTP 403 Access Denied on
+> blocking days, `akamai_challenge=false`), 0 Akamai challenges, 0 HTTP 429.
+> Manual accuracy check 28/28 rows matched (rounds 1–2; round 3 skipped —
+> sample was 28 of the planned 45 rows). Price-change evidence was thin:
+> only 4 of 50 SKUs moved price across 6 runs. Next step: `SCHEMA.md`
+> (Schema v2) → `POST /api/ingest/noon`. Dispatch test and Worker edge probe
+> were not run — closed with the Spike, so do NOT promise an "update now" button.
+>
+> **After close (2026-11-18):** the workflow was NOT disabled — it keeps
+> collecting price history for the EMA cold start, now on a **6-hour cron**
+> (`0 */6 * * *`, see `.github/workflows/spike.yml` — re-upload needed) instead
+> of hourly. The tracked set was refreshed the same day: 12 accessories out,
+> 6 phones + 6 laptops in (see `skus.csv`); the 12 new SKUs start `unproven`.
+> Record counts in this file were true at close time only — the live dashboard
+> is authoritative for current totals (700 records by the 6th run, 10:42 EET).
 
 > Spike only. No Worker, no D1, no Telegram bot, no feature outside this Spike.
 > Question to answer with numbers: can we fetch a Noon Egypt product's
