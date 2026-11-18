@@ -8,7 +8,14 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from fetcher import parse_data_qa, parse_embedded_offer, parse_json_ld, parse_pdp, parse_search
+from fetcher import (
+    extract_image_url,
+    parse_data_qa,
+    parse_embedded_offer,
+    parse_json_ld,
+    parse_pdp,
+    parse_search,
+)
 from scraper import _is_akamai_challenge, parse_products_from_html
 
 SAMPLES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "samples")
@@ -26,6 +33,43 @@ def test_json_ld_gives_pinned_offer_price_and_seller():
     assert result["original_price"] == 3300.0
     assert result["seller"] == "Dokkan Tech"
     assert result["in_stock"] is True
+
+
+def test_json_ld_gives_first_image_url():
+    result = parse_json_ld(_read("pdp_sample.html"))
+    assert result is not None
+    assert result["image_url"] == (
+        "https://f.nooncdn.com/p/pzsku/ZC828F28BBB2158AD1155Z/45/_/1779704343/"
+        "7ad6add4-8892-4182-829f-97d019bebfde.jpg?width=1200"
+    )
+
+
+def test_pdp_carries_image_url():
+    result = parse_pdp(_read("pdp_sample.html"), "N21961435A", "f96a6024019fdc0d")
+    assert result["parse_ok"] is True
+    assert result["image_url"] is not None
+    assert result["image_url"].startswith("https://f.nooncdn.com/")
+
+
+def test_extract_image_url_falls_back_to_og_image():
+    html = (
+        '<html><head><meta property="og:image" '
+        'content="https://f.nooncdn.com/p/x.jpg"></head>'
+        '<body><script type="application/ld+json">'
+        '{"@type": "Product", "offers": {"price": 10}}</script></body></html>'
+    )
+    assert extract_image_url(html) == "https://f.nooncdn.com/p/x.jpg"
+
+
+def test_extract_image_url_is_none_without_any_image():
+    html = '<html><head></head><body><script type="application/ld+json">{"@type": "Product", "offers": {"price": 10}}</script></body></html>'
+    assert extract_image_url(html) is None
+
+
+def test_pdp_failure_has_no_image():
+    result = parse_pdp("<html><body>no data</body></html>", "N00000000A", "")
+    assert result["parse_ok"] is False
+    assert result["image_url"] is None
 
 
 def test_embedded_offer_gives_same_price_as_json_ld():

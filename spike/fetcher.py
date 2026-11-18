@@ -26,7 +26,12 @@ Two strategies, one unified record per call:
 Unified record fields:
   ts, sku, strategy, http_status, attempts, impersonate,
   akamai_challenge, parse_ok, parser_used, price, original_price,
-  seller, in_stock, offer_code, elapsed_ms, error
+  seller, in_stock, offer_code, elapsed_ms, error, image_url
+
+Product image (strategy A only, 2026-11-18): the PDP JSON-LD Product
+block carries `image` as a list of f.nooncdn.com URLs — the first one is
+the main image. og:image is the fallback when JSON-LD has none. Strategy
+B records carry image_url=None; the ingest rejects strategy B anyway.
 
 Low volume: one curl_cffi Session per run (see run_spike.py), no
 parallelism. Retries rotate the upstream impersonation pool.
@@ -151,6 +156,42 @@ class Fetcher:
 
 # ── PDP parsers (strategy A) ─────────────────────────────────────────────
 
+def _first_http_url(value) -> str | None:
+    """First http(s) URL out of a string, a list of strings, or {url: ...}."""
+    if isinstance(value, str):
+        return value if value.startswith("http") else None
+    if isinstance(value, list):
+        for item in value:
+            url = _first_http_url(item)
+            if url:
+                return url
+        return None
+    if isinstance(value, dict):
+        return _first_http_url(value.get("url"))
+    return None
+
+
+def extract_image_url(html: str) -> str | None:
+    """Main product image URL: JSON-LD Product `image` first, og:image fallback."""
+    soup = BeautifulSoup(html, "html.parser")
+    for tag in soup.find_all("script", type="application/ld+json"):
+        try:
+            data = json.loads(tag.string or "")
+        except (json.JSONDecodeError, TypeError):
+            continue
+        items = data if isinstance(data, list) else [data]
+        for item in items:
+            if not isinstance(item, dict) or item.get("@type") != "Product":
+                continue
+            url = _first_http_url(item.get("image"))
+            if url:
+                return url
+    tag = soup.find("meta", property="og:image")
+    if tag and tag.get("content"):
+        return _first_http_url(tag["content"])
+    return None
+
+
 def parse_json_ld(html: str) -> dict | None:
     soup = BeautifulSoup(html, "html.parser")
     for tag in soup.find_all("script", type="application/ld+json"):
@@ -176,6 +217,7 @@ def parse_json_ld(html: str) -> dict | None:
                 "seller": seller.get("name") if isinstance(seller, dict) else None,
                 "in_stock": "InStock" in availability,
                 "parser_used": "json_ld",
+                "image_url": _first_http_url(item.get("image")),
             }
     return None
 
@@ -244,10 +286,15 @@ def parse_pdp(html: str, sku: str, offer_code: str = "") -> dict:
     ):
         result = parser(html)
         if result:
+            # json_ld carries the image; the other parsers get the og:image
+            # fallback (or the JSON-LD image) so every PDP parse has one.
+            if not result.get("image_url"):
+                result["image_url"] = extract_image_url(html)
             return {**result, "parse_ok": True}
     return {
         "price": None, "original_price": None, "seller": None,
         "in_stock": None, "parser_used": None, "parse_ok": False,
+        "image_url": None,
     }
 
 
@@ -328,11 +375,14 @@ def fetch_product(
         "offer_code": offer_code,
         "elapsed_ms": elapsed_ms,
         "error": fetched["error"],
+        "image_url": None,
     }
     html = fetched["html"]
     if fetched["error"] is None and html:
         parsed = parse_pdp(html, sku, offer_code) if strategy == "A" else parse_search(html, sku)
         record.update({k: parsed[k] for k in ("parse_ok", "parser_used", "price", "original_price", "seller", "in_stock")})
+        if strategy == "A":
+            record["image_url"] = parsed.get("image_url")
         if not parsed["parse_ok"]:
             record["error"] = "parse_failed"
     return record, html
