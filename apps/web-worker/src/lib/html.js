@@ -63,12 +63,16 @@ ${body}
 </html>`;
 }
 
+export function unverifiedBadge() {
+  return '<span class="inline-block rounded-full px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-800">سعر أولي — لم يُتحقق منه</span>';
+}
+
 export function productCard(p, deal) {
   const pct = discountPct(p.current_price_minor, p.current_original_price_minor);
   return `<a href="/products/${p.id}" class="block bg-white rounded-xl shadow p-4 hover:shadow-md transition">
   <div class="flex items-start justify-between gap-2">
     <h2 class="font-bold leading-snug">${esc(p.name)}</h2>
-    ${dealBadge(deal.state)}
+    ${deal.verified ? dealBadge(deal.state) : unverifiedBadge()}
   </div>
   <p class="text-sm text-gray-500 mt-1">${esc(brandCategory(p))}</p>
   <div class="mt-3 flex items-end gap-2">
@@ -156,6 +160,15 @@ export function detailPage(p, deal, points, days) {
         `<a href="/products/${p.id}?days=${d}" class="px-3 py-1 rounded ${d === days ? 'bg-red-600 text-white' : 'bg-white shadow'} text-sm">${d} يوم</a>`,
     )
     .join(' ');
+  // Unverified products (price from the sku list only): no min/max/EMA claims.
+  const minMax = deal.verified && minPoint ? formatEGP(minPoint.price_minor) : '—';
+  const maxMax = deal.verified && maxPoint ? formatEGP(maxPoint.price_minor) : '—';
+  const emaNote = !deal.verified
+    ? '<div class="text-sm text-gray-400">لا يوجد متوسط — المنتج لم يُفحص بعد</div>'
+    : deal.drop_pct !== null
+      ? `<div class="text-sm text-green-600">أقل من المتوسط بنسبة ${deal.drop_pct}%</div>`
+      : '<div class="text-sm text-gray-400">تاريخ أقل من 7 أيام — غير مثبَت</div>';
+  const priceTimeLabel = deal.verified ? 'آخر تغيّر سعر' : 'سعر القائمة بتاريخ';
   const rows = [...points].reverse()
     .map(
       (pt) => `<tr class="border-t">
@@ -177,19 +190,20 @@ export function detailPage(p, deal, points, days) {
     <div class="text-3xl font-black text-red-600">${formatEGP(p.current_price_minor)}</div>
     ${p.current_original_price_minor && pct !== null ? `<div class="text-gray-400 line-through">${formatEGP(p.current_original_price_minor)} <span class="text-green-600 font-bold no-underline">-${pct}%</span></div>` : ''}
   </div>
-  ${dealBadge(deal.state)}
+  ${deal.verified ? dealBadge(deal.state) : unverifiedBadge()}
   <div class="text-sm text-gray-500">
     <div>البائع: ${esc(p.current_seller || '—')}</div>
     <div>${stockLabel(p.in_stock)}</div>
     <div>آخر فحص ناجح: ${esc(p.last_successful_check_at || '—')}</div>
-    <div>آخر تغيّر سعر: ${esc(p.price_updated_at || '—')}</div>
+    <div>${priceTimeLabel}: ${esc(p.price_updated_at || '—')}</div>
   </div>
   ${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" class="mr-auto px-4 py-2 bg-red-600 text-white rounded-lg font-bold">اشترِ من نون</a>` : ''}
 </div>
+${deal.verified ? '' : '<div class="mt-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-3 text-sm font-bold">سعر أولي من القائمة — لم يُتحقق منه بعد. هذا السعر من قائمة المنتجات وقت الإعداد، ولم يُفحص بعد من صفحة المنتج على نون.</div>'}
 <div class="mt-4 grid gap-4 md:grid-cols-3 text-center">
-  <div class="bg-white rounded-xl shadow p-3"><div class="text-xs text-gray-400">أقل سعر (${days} يوم)</div><div class="font-black text-lg">${minPoint ? formatEGP(minPoint.price_minor) : '—'}</div></div>
-  <div class="bg-white rounded-xl shadow p-3"><div class="text-xs text-gray-400">أعلى سعر (${days} يوم)</div><div class="font-black text-lg">${maxPoint ? formatEGP(maxPoint.price_minor) : '—'}</div></div>
-  <div class="bg-white rounded-xl shadow p-3"><div class="text-xs text-gray-400">متوسط 30 يوم (EMA)</div><div class="font-black text-lg">${deal.ema_minor !== null ? formatEGP(deal.ema_minor) : '—'}</div>${deal.drop_pct !== null ? `<div class="text-sm text-green-600">أقل من المتوسط بنسبة ${deal.drop_pct}%</div>` : '<div class="text-sm text-gray-400">تاريخ أقل من 7 أيام — غير مثبَت</div>'}</div>
+  <div class="bg-white rounded-xl shadow p-3"><div class="text-xs text-gray-400">أقل سعر (${days} يوم)</div><div class="font-black text-lg">${minMax}</div></div>
+  <div class="bg-white rounded-xl shadow p-3"><div class="text-xs text-gray-400">أعلى سعر (${days} يوم)</div><div class="font-black text-lg">${maxMax}</div></div>
+  <div class="bg-white rounded-xl shadow p-3"><div class="text-xs text-gray-400">متوسط 30 يوم (EMA)</div><div class="font-black text-lg">${deal.ema_minor !== null ? formatEGP(deal.ema_minor) : '—'}</div>${emaNote}</div>
 </div>
 <div class="mt-6 flex items-center gap-2">${dayLinks}<span class="text-sm text-gray-500">${points.length} نقطة</span></div>
 <div class="mt-2">${priceChart(points)}</div>

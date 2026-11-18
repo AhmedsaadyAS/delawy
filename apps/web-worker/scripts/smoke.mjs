@@ -79,6 +79,18 @@ await check('unknown product is 404', async () => {
   assert(res.status === 404, `expected 404, got ${res.status}`);
 });
 
+await check('unverified product (sku_list) shows no EMA and no fake check time', async () => {
+  const page = await getJson('/api/products?page=1&limit=100');
+  const unverified = page.data.find((p) => p.verified === false);
+  assert(unverified, 'expected at least one unverified product in the list');
+  assert(unverified.price_source === 'sku_list', 'price_source should be sku_list');
+  assert(unverified.ema_minor === null, `ema_minor should be null, got ${unverified.ema_minor}`);
+  assert(unverified.last_successful_check_at === null, 'last_successful_check_at should be null');
+  const html = await getHtml(`/products/${unverified.id}`);
+  assert(html.includes('لم يُتحقق منه'), 'detail page missing unverified banner');
+  assert(html.includes('متوسط 30 يوم (EMA)</div><div class="font-black text-lg">—</div>'), 'EMA box must show — for unverified product');
+});
+
 await check('HTML list page renders', async () => {
   const html = await getHtml('/');
   assert(html.includes('ديلاوي'), 'missing brand');

@@ -78,3 +78,29 @@ export const DEAL_LABELS = {
   normal: 'عادي',
   bad: 'فوق المتوسط',
 };
+
+/**
+ * Resolve the deal display for a product.
+ *
+ * A product is verified only if it has at least one successful reading
+ * (last_successful_check_at !== null). An unverified product's price comes
+ * from the sku list only: it gets NO EMA and NO quality claim — state
+ * 'unproven', ema_minor null, price_source 'sku_list'. Its single point (if
+ * any) is a listing observation, not a price check.
+ */
+export function resolveDeal(product, points) {
+  const verified =
+    product.last_successful_check_at !== null &&
+    product.last_successful_check_at !== undefined;
+  if (!verified) {
+    return {
+      state: 'unproven',
+      ema_minor: null,
+      drop_pct: null,
+      verified: false,
+      price_source: 'sku_list',
+    };
+  }
+  const deal = dealState(product.current_price_minor, points);
+  return { ...deal, verified: true, price_source: 'spike_run' };
+}

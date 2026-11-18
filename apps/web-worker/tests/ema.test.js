@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { timeWeightedEma, dealState, dropThreshold } from '../src/lib/ema.js';
+import { timeWeightedEma, dealState, dropThreshold, resolveDeal } from '../src/lib/ema.js';
 
 const P = (ts, priceMinor) => ({ ts, price_minor: priceMinor });
 
@@ -49,4 +49,27 @@ test('drop threshold interpolates 15% at 100 EGP to 3% at 100k EGP', () => {
   assert.equal(dropThreshold(100000 * 100), 0.03);
   const mid = dropThreshold(10000 * 100);
   assert.ok(mid > 0.03 && mid < 0.15);
+});
+
+test('resolveDeal: unverified product (sku_list only) gets no EMA and no quality claim', () => {
+  const deal = resolveDeal(
+    { current_price_minor: 149900, last_successful_check_at: null },
+    [P('2026-11-18T00:00:00Z', 149900)],
+  );
+  assert.equal(deal.verified, false);
+  assert.equal(deal.price_source, 'sku_list');
+  assert.equal(deal.state, 'unproven');
+  assert.equal(deal.ema_minor, null);
+  assert.equal(deal.drop_pct, null);
+});
+
+test('resolveDeal: verified product with short history is unproven but verified', () => {
+  const deal = resolveDeal(
+    { current_price_minor: 179900, last_successful_check_at: '2026-11-18T08:00:00Z' },
+    [P('2026-11-17T08:00:00Z', 179900), P('2026-11-18T08:00:00Z', 179900)],
+  );
+  assert.equal(deal.verified, true);
+  assert.equal(deal.price_source, 'spike_run');
+  assert.equal(deal.state, 'unproven');
+  assert.equal(deal.ema_minor, 179900);
 });

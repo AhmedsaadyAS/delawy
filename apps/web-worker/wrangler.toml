@@ -1,10 +1,14 @@
 # Delawy web worker — Cloudflare Workers + D1 (local-first, experimental).
 #
-# No account IDs or secrets live in this file. The database_id below is a
-# PLACEHOLDER for local development only (`--local` never contacts the API).
-# Do NOT deploy and do NOT apply migrations to a remote database without the
-# user's explicit approval — when that day comes, create the real database
-# with `wrangler d1 create delawy` and put its id here.
+# No account IDs or secrets live in this file. The database_id values below
+# are PLACEHOLDERS for local development only (`--local` never contacts the
+# API). A remote database id is written here ONLY after the user approves the
+# exact creation command — see README "Staging".
+#
+# SAFETY RULE: every remote command must name its environment explicitly:
+#   --env staging --remote
+# Never run a bare `wrangler deploy`, `wrangler d1 execute` or
+# `wrangler d1 migrations apply` — the top-level config has no real database.
 
 name = "delawy-web"
 main = "src/index.js"
@@ -13,5 +17,19 @@ compatibility_date = "2026-11-18"
 [[d1_databases]]
 binding = "DB"
 database_name = "delawy"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+# --- Staging: separate Worker + separate D1 database. -----------------------
+# Created only after user approval:
+#   wrangler d1 create delawy-staging-db
+# The returned database_id replaces the placeholder below (same UUID shape
+# is used here only so local `--env staging --local` keeps working).
+[env.staging]
+name = "delawy-staging"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "delawy-staging-db"
 database_id = "00000000-0000-0000-0000-000000000000"
 migrations_dir = "migrations"

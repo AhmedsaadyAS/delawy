@@ -18,7 +18,7 @@ import {
   getCounts,
 } from './lib/db.js';
 import { parsePagination, pageMeta, parseDays } from './lib/pagination.js';
-import { dealState } from './lib/ema.js';
+import { resolveDeal } from './lib/ema.js';
 import { fromMinor } from './lib/money.js';
 import { listPage, detailPage, notFoundPage } from './lib/html.js';
 
@@ -63,6 +63,8 @@ function productJson(p, deal, pointsCount) {
     ema: fromMinor(deal.ema_minor),
     deal_state: deal.state,
     drop_pct: deal.drop_pct,
+    verified: deal.verified,
+    price_source: deal.price_source,
     points_count: pointsCount,
   };
 }
@@ -90,7 +92,7 @@ export default {
           pointsByProduct.get(pt.product_id).push(pt);
         }
         const data = rows.map((p) => {
-          const deal = dealState(p.current_price_minor, pointsByProduct.get(p.id) || []);
+          const deal = resolveDeal(p, pointsByProduct.get(p.id) || []);
           return productJson(p, deal, (pointsByProduct.get(p.id) || []).length);
         });
         return json({ ...pageMeta(total, { page, limit }), data });
@@ -134,7 +136,7 @@ export default {
         }
 
         const points = await getHistory(db, id, { limit: 1000 });
-        const deal = dealState(product.current_price_minor, points);
+        const deal = resolveDeal(product, points);
         return json(productJson(product, deal, points.length));
       }
 
@@ -153,7 +155,7 @@ export default {
           pointsByProduct.get(pt.product_id).push(pt);
         }
         const deals = rows.map((p) =>
-          dealState(p.current_price_minor, pointsByProduct.get(p.id) || []),
+          resolveDeal(p, pointsByProduct.get(p.id) || []),
         );
         return html(listPage(rows, deals, pageMeta(total, { page, limit })));
       }
@@ -167,7 +169,7 @@ export default {
         const sinceIso = new Date(Date.now() - days * 86_400_000).toISOString();
         const points = await getHistory(db, id, { sinceIso, limit: 1000 });
         const allPoints = await getHistory(db, id, { limit: 1000 });
-        const deal = dealState(product.current_price_minor, allPoints);
+        const deal = resolveDeal(product, allPoints);
         return html(detailPage(product, deal, points, days));
       }
 
