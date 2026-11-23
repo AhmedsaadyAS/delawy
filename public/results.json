@@ -1,48 +1,48 @@
 {
-  "generated_at": "2026-11-22T23:40:01.665254Z",
-  "records_total": 2020,
-  "success_rate": 96.8,
-  "success_count": 1956,
+  "generated_at": "2026-11-23T06:34:46.546117Z",
+  "records_total": 2140,
+  "success_rate": 97.0,
+  "success_count": 2076,
   "akamai_count": 0,
   "akamai_rate": 0.0,
   "http_429_count": 0,
   "latency_ms": {
-    "median": 8137.5,
-    "p95": 10748.0,
-    "n": 1956
+    "median": 8100.0,
+    "p95": 10720.0,
+    "n": 2076
   },
   "by_strategy": {
     "A": {
-      "records": 1010,
-      "success_rate": 97.2,
+      "records": 1070,
+      "success_rate": 97.4,
       "akamai_rate": 0.0
     },
     "B": {
-      "records": 1010,
-      "success_rate": 96.4,
+      "records": 1070,
+      "success_rate": 96.6,
       "akamai_rate": 0.0
     }
   },
   "by_warp": {
     "False": {
-      "records": 320,
-      "success_rate": 80.0,
+      "records": 340,
+      "success_rate": 81.2,
       "akamai_rate": 0.0
     },
     "True": {
-      "records": 1700,
+      "records": 1800,
       "success_rate": 100.0,
       "akamai_rate": 0.0
     }
   },
   "by_parser": {
     "embedded_payload": {
-      "records": 974,
+      "records": 1034,
       "success_rate": 100.0,
       "akamai_rate": 0.0
     },
     "json_ld": {
-      "records": 982,
+      "records": 1042,
       "success_rate": 100.0,
       "akamai_rate": 0.0
     }
@@ -79,7 +79,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:28:00.899056Z",
+      "ts": "2026-11-23T06:23:08.221392Z",
       "status": "ok"
     },
     {
@@ -91,7 +91,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:32:43.853813Z",
+      "ts": "2026-11-23T06:27:29.605027Z",
       "status": "ok"
     },
     {
@@ -103,7 +103,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:30:38.751833Z",
+      "ts": "2026-11-23T06:25:35.604631Z",
       "status": "ok"
     },
     {
@@ -115,7 +115,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:23:12.042012Z",
+      "ts": "2026-11-23T06:18:23.899600Z",
       "status": "ok"
     },
     {
@@ -127,7 +127,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:25:58.004688Z",
+      "ts": "2026-11-23T06:21:10.897032Z",
       "status": "ok"
     },
     {
@@ -139,7 +139,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:28:36.195487Z",
+      "ts": "2026-11-23T06:23:43.741441Z",
       "status": "ok"
     },
     {
@@ -151,7 +151,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:25:43.425046Z",
+      "ts": "2026-11-23T06:20:52.055878Z",
       "status": "ok"
     },
     {
@@ -163,7 +163,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:30:04.053595Z",
+      "ts": "2026-11-23T06:25:04.224838Z",
       "status": "ok"
     },
     {
@@ -175,7 +175,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:32:29.282848Z",
+      "ts": "2026-11-23T06:27:14.755450Z",
       "status": "ok"
     },
     {
@@ -199,7 +199,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:30:59.367069Z",
+      "ts": "2026-11-23T06:25:53.235821Z",
       "status": "ok"
     },
     {
@@ -211,7 +211,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:29:14.540674Z",
+      "ts": "2026-11-23T06:24:15.631650Z",
       "status": "ok"
     },
     {
@@ -223,7 +223,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:23:27.299463Z",
+      "ts": "2026-11-23T06:18:41.922879Z",
       "status": "ok"
     },
     {
@@ -235,7 +235,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:30:19.095065Z",
+      "ts": "2026-11-23T06:25:19.159978Z",
       "status": "ok"
     },
     {
@@ -259,7 +259,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:27:25.530135Z",
+      "ts": "2026-11-23T06:22:31.553773Z",
       "status": "ok"
     },
     {
@@ -295,7 +295,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:31:17.277274Z",
+      "ts": "2026-11-23T06:26:11.439037Z",
       "status": "ok"
     },
     {
@@ -307,7 +307,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:23:43.658444Z",
+      "ts": "2026-11-23T06:18:56.525284Z",
       "status": "ok"
     },
     {
@@ -319,7 +319,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:25:26.094831Z",
+      "ts": "2026-11-23T06:20:36.060612Z",
       "status": "ok"
     },
     {
@@ -331,7 +331,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:32:13.725316Z",
+      "ts": "2026-11-23T06:27:00.257709Z",
       "status": "ok"
     },
     {
@@ -343,7 +343,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:36:12.827632Z",
+      "ts": "2026-11-23T06:30:53.811620Z",
       "status": "ok"
     },
     {
@@ -355,7 +355,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:24:36.979405Z",
+      "ts": "2026-11-23T06:19:44.929919Z",
       "status": "ok"
     },
     {
@@ -367,7 +367,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:36:30.323334Z",
+      "ts": "2026-11-23T06:31:09.428598Z",
       "status": "ok"
     },
     {
@@ -379,7 +379,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:26:48.805801Z",
+      "ts": "2026-11-23T06:21:59.448447Z",
       "status": "ok"
     },
     {
@@ -391,7 +391,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:33:02.785062Z",
+      "ts": "2026-11-23T06:27:46.959124Z",
       "status": "ok"
     },
     {
@@ -403,7 +403,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:22:37.805323Z",
+      "ts": "2026-11-23T06:17:51.048465Z",
       "status": "ok"
     },
     {
@@ -415,7 +415,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:35:23.004146Z",
+      "ts": "2026-11-23T06:30:00.547717Z",
       "status": "ok"
     },
     {
@@ -427,7 +427,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:33:21.198382Z",
+      "ts": "2026-11-23T06:28:03.086647Z",
       "status": "ok"
     },
     {
@@ -439,7 +439,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:28:55.738008Z",
+      "ts": "2026-11-23T06:23:59.451358Z",
       "status": "ok"
     },
     {
@@ -451,7 +451,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:31:56.953239Z",
+      "ts": "2026-11-23T06:26:43.584027Z",
       "status": "ok"
     },
     {
@@ -463,7 +463,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:28:19.118682Z",
+      "ts": "2026-11-23T06:23:24.978474Z",
       "status": "ok"
     },
     {
@@ -475,7 +475,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:27:43.914810Z",
+      "ts": "2026-11-23T06:22:51.244996Z",
       "status": "ok"
     },
     {
@@ -487,7 +487,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:33:36.627567Z",
+      "ts": "2026-11-23T06:28:18.557636Z",
       "status": "ok"
     },
     {
@@ -499,7 +499,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:26:13.271067Z",
+      "ts": "2026-11-23T06:21:28.371737Z",
       "status": "ok"
     },
     {
@@ -511,7 +511,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:24:01.703519Z",
+      "ts": "2026-11-23T06:19:12.516387Z",
       "status": "ok"
     },
     {
@@ -523,7 +523,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:31:37.049257Z",
+      "ts": "2026-11-23T06:26:28.758475Z",
       "status": "ok"
     },
     {
@@ -535,7 +535,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:35:04.719770Z",
+      "ts": "2026-11-23T06:29:44.541347Z",
       "status": "ok"
     },
     {
@@ -547,7 +547,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:34:27.694737Z",
+      "ts": "2026-11-23T06:29:08.941141Z",
       "status": "ok"
     },
     {
@@ -559,7 +559,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:27:06.955093Z",
+      "ts": "2026-11-23T06:22:14.646731Z",
       "status": "ok"
     },
     {
@@ -571,7 +571,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:35:40.262106Z",
+      "ts": "2026-11-23T06:30:19.260577Z",
       "status": "ok"
     },
     {
@@ -583,7 +583,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:34:48.697336Z",
+      "ts": "2026-11-23T06:29:26.478944Z",
       "status": "ok"
     },
     {
@@ -595,7 +595,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:33:51.688120Z",
+      "ts": "2026-11-23T06:28:34.053848Z",
       "status": "ok"
     },
     {
@@ -607,7 +607,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:35:56.550273Z",
+      "ts": "2026-11-23T06:30:37.563013Z",
       "status": "ok"
     },
     {
@@ -619,7 +619,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:34:08.980350Z",
+      "ts": "2026-11-23T06:28:52.246730Z",
       "status": "ok"
     },
     {
@@ -631,7 +631,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:22:22.673366Z",
+      "ts": "2026-11-23T06:17:32.228288Z",
       "status": "ok"
     },
     {
@@ -679,7 +679,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:26:29.140568Z",
+      "ts": "2026-11-23T06:21:43.947276Z",
       "status": "ok"
     },
     {
@@ -691,7 +691,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:24:52.930183Z",
+      "ts": "2026-11-23T06:20:02.486850Z",
       "status": "ok"
     },
     {
@@ -703,7 +703,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:29:31.348052Z",
+      "ts": "2026-11-23T06:24:31.588067Z",
       "status": "ok"
     },
     {
@@ -715,7 +715,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:22:55.484240Z",
+      "ts": "2026-11-23T06:18:04.353632Z",
       "status": "ok"
     },
     {
@@ -727,7 +727,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:25:10.110509Z",
+      "ts": "2026-11-23T06:20:18.923648Z",
       "status": "ok"
     },
     {
@@ -751,7 +751,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:24:17.832949Z",
+      "ts": "2026-11-23T06:19:27.703151Z",
       "status": "ok"
     },
     {
@@ -799,12 +799,12 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-22T23:29:48.571495Z",
+      "ts": "2026-11-23T06:24:47.552288Z",
       "status": "ok"
     }
   ],
   "first_ts": "2026-11-16T14:48:49.798948Z",
-  "last_ts": "2026-11-22T23:39:46.947136Z",
+  "last_ts": "2026-11-23T06:34:28.593517Z",
   "decision": "go",
   "decision_reasons": []
 }
