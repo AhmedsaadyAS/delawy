@@ -1,48 +1,48 @@
 {
-  "generated_at": "2026-11-26T21:25:40.344503Z",
-  "records_total": 2980,
-  "success_rate": 96.9,
-  "success_count": 2889,
+  "generated_at": "2026-11-27T07:36:12.999418Z",
+  "records_total": 3100,
+  "success_rate": 96.4,
+  "success_count": 2987,
   "akamai_count": 0,
   "akamai_rate": 0.0,
   "http_429_count": 0,
   "latency_ms": {
     "median": 8105.0,
     "p95": 10684.0,
-    "n": 2889
+    "n": 2987
   },
   "by_strategy": {
     "A": {
-      "records": 1490,
-      "success_rate": 97.3,
+      "records": 1550,
+      "success_rate": 96.7,
       "akamai_rate": 0.0
     },
     "B": {
-      "records": 1490,
-      "success_rate": 96.6,
+      "records": 1550,
+      "success_rate": 96.0,
       "akamai_rate": 0.0
     }
   },
   "by_warp": {
     "False": {
-      "records": 480,
-      "success_rate": 81.9,
+      "records": 500,
+      "success_rate": 78.6,
       "akamai_rate": 0.0
     },
     "True": {
-      "records": 2500,
+      "records": 2600,
       "success_rate": 99.8,
       "akamai_rate": 0.0
     }
   },
   "by_parser": {
     "embedded_payload": {
-      "records": 1439,
+      "records": 1488,
       "success_rate": 100.0,
       "akamai_rate": 0.0
     },
     "json_ld": {
-      "records": 1450,
+      "records": 1499,
       "success_rate": 100.0,
       "akamai_rate": 0.0
     }
@@ -72,14 +72,14 @@
     },
     {
       "sku": "N11426566A",
-      "last_price": 5683.9,
+      "last_price": 5670.65,
       "original_price": 11332.0,
       "seller": "Future Trade",
       "in_stock": true,
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:09:12.593221Z",
+      "ts": "2026-11-27T07:18:59.372206Z",
       "status": "ok"
     },
     {
@@ -91,7 +91,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:13:47.464275Z",
+      "ts": "2026-11-27T07:23:48.579907Z",
       "status": "ok"
     },
     {
@@ -103,7 +103,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:11:47.727060Z",
+      "ts": "2026-11-27T07:21:40.604194Z",
       "status": "ok"
     },
     {
@@ -115,7 +115,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:04:19.006570Z",
+      "ts": "2026-11-27T07:13:58.269283Z",
       "status": "ok"
     },
     {
@@ -127,7 +127,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:07:08.470225Z",
+      "ts": "2026-11-27T07:16:55.705712Z",
       "status": "ok"
     },
     {
@@ -139,7 +139,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:09:48.234230Z",
+      "ts": "2026-11-27T07:19:35.387137Z",
       "status": "ok"
     },
     {
@@ -151,31 +151,31 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:06:52.580928Z",
+      "ts": "2026-11-27T07:16:36.217140Z",
       "status": "ok"
     },
     {
       "sku": "N48503194A",
       "last_price": 5400.0,
-      "original_price": 5765.65,
+      "original_price": 5765.5,
       "seller": "Elogail Store",
       "in_stock": true,
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:11:14.920841Z",
+      "ts": "2026-11-27T07:21:06.085482Z",
       "status": "ok"
     },
     {
       "sku": "N49988517A",
-      "last_price": 25599.0,
-      "original_price": 25599.0,
+      "last_price": 25149.0,
+      "original_price": 25149.0,
       "seller": "Radio Talaat",
       "in_stock": true,
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:13:30.165265Z",
+      "ts": "2026-11-27T07:23:30.729844Z",
       "status": "ok"
     },
     {
@@ -199,19 +199,19 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:12:02.659088Z",
+      "ts": "2026-11-27T07:21:59.167632Z",
       "status": "ok"
     },
     {
       "sku": "N53328528A",
       "last_price": 6499.95,
-      "original_price": 7199.95,
+      "original_price": 7161.25,
       "seller": "Elogail Store",
       "in_stock": true,
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:10:23.381286Z",
+      "ts": "2026-11-27T07:20:12.611774Z",
       "status": "ok"
     },
     {
@@ -223,7 +223,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:04:35.858480Z",
+      "ts": "2026-11-27T07:14:15.421068Z",
       "status": "ok"
     },
     {
@@ -235,7 +235,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:11:30.125293Z",
+      "ts": "2026-11-27T07:21:22.427048Z",
       "status": "ok"
     },
     {
@@ -259,7 +259,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:08:37.719268Z",
+      "ts": "2026-11-27T07:18:25.600930Z",
       "status": "ok"
     },
     {
@@ -295,7 +295,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:12:20.416389Z",
+      "ts": "2026-11-27T07:22:15.558060Z",
       "status": "ok"
     },
     {
@@ -307,7 +307,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:04:52.756164Z",
+      "ts": "2026-11-27T07:14:32.667794Z",
       "status": "ok"
     },
     {
@@ -319,19 +319,19 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:06:33.342413Z",
+      "ts": "2026-11-27T07:16:17.776490Z",
       "status": "ok"
     },
     {
       "sku": "N70106569V",
-      "last_price": 34450.55,
-      "original_price": 34450.55,
+      "last_price": 34451.25,
+      "original_price": 34451.25,
       "seller": "Future Trade",
       "in_stock": true,
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:13:12.153771Z",
+      "ts": "2026-11-27T07:23:10.558946Z",
       "status": "ok"
     },
     {
@@ -343,7 +343,7 @@
       "parse_ok": false,
       "akamai_challenge": false,
       "parser_used": null,
-      "ts": "2026-11-26T21:17:14.669118Z",
+      "ts": "2026-11-27T07:27:24.787818Z",
       "status": "failed"
     },
     {
@@ -355,7 +355,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:05:39.301702Z",
+      "ts": "2026-11-27T07:15:27.971134Z",
       "status": "ok"
     },
     {
@@ -367,19 +367,19 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:17:30.274742Z",
+      "ts": "2026-11-27T07:27:44.044515Z",
       "status": "ok"
     },
     {
       "sku": "N70120304V",
-      "last_price": 2988.0,
-      "original_price": 10000.0,
-      "seller": "Hubz Smart",
+      "last_price": 3149.0,
+      "original_price": 3999.0,
+      "seller": "noon",
       "in_stock": true,
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:08:02.081886Z",
+      "ts": "2026-11-27T07:17:51.750782Z",
       "status": "ok"
     },
     {
@@ -391,7 +391,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:14:03.900285Z",
+      "ts": "2026-11-27T07:24:06.625299Z",
       "status": "ok"
     },
     {
@@ -403,31 +403,31 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:03:43.659853Z",
+      "ts": "2026-11-27T07:13:23.245815Z",
       "status": "ok"
     },
     {
       "sku": "N70154926V",
-      "last_price": null,
-      "original_price": null,
-      "seller": null,
-      "in_stock": null,
-      "parse_ok": false,
+      "last_price": 66960.0,
+      "original_price": 71999.0,
+      "seller": "Dubai Phone Authorized seller",
+      "in_stock": true,
+      "parse_ok": true,
       "akamai_challenge": false,
-      "parser_used": null,
-      "ts": "2026-11-26T21:16:22.518955Z",
-      "status": "failed"
+      "parser_used": "json_ld",
+      "ts": "2026-11-27T07:26:31.469631Z",
+      "status": "ok"
     },
     {
       "sku": "N70158922V",
-      "last_price": 21199.0,
+      "last_price": 23999.0,
       "original_price": 27999.0,
       "seller": "noon",
       "in_stock": true,
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:14:21.445574Z",
+      "ts": "2026-11-27T07:24:24.465564Z",
       "status": "ok"
     },
     {
@@ -439,7 +439,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:10:05.024460Z",
+      "ts": "2026-11-27T07:19:54.048875Z",
       "status": "ok"
     },
     {
@@ -451,7 +451,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:12:54.742996Z",
+      "ts": "2026-11-27T07:22:53.763142Z",
       "status": "ok"
     },
     {
@@ -463,7 +463,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:09:30.654554Z",
+      "ts": "2026-11-27T07:19:16.910587Z",
       "status": "ok"
     },
     {
@@ -475,7 +475,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:08:54.720967Z",
+      "ts": "2026-11-27T07:18:42.864223Z",
       "status": "ok"
     },
     {
@@ -487,7 +487,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:14:38.824115Z",
+      "ts": "2026-11-27T07:24:42.465772Z",
       "status": "ok"
     },
     {
@@ -499,7 +499,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:07:27.890961Z",
+      "ts": "2026-11-27T07:17:12.501889Z",
       "status": "ok"
     },
     {
@@ -511,7 +511,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:05:07.953937Z",
+      "ts": "2026-11-27T07:14:51.287892Z",
       "status": "ok"
     },
     {
@@ -523,7 +523,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:12:36.557231Z",
+      "ts": "2026-11-27T07:22:35.628646Z",
       "status": "ok"
     },
     {
@@ -535,19 +535,19 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:16:05.349146Z",
+      "ts": "2026-11-27T07:26:11.904713Z",
       "status": "ok"
     },
     {
       "sku": "N70221570V",
-      "last_price": 8659.0,
+      "last_price": 9499.0,
       "original_price": 10999.0,
       "seller": "noon",
       "in_stock": true,
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:15:29.572901Z",
+      "ts": "2026-11-27T07:25:36.454131Z",
       "status": "ok"
     },
     {
@@ -559,7 +559,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:08:20.386318Z",
+      "ts": "2026-11-27T07:18:10.511497Z",
       "status": "ok"
     },
     {
@@ -571,7 +571,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:16:40.817658Z",
+      "ts": "2026-11-27T07:26:48.169833Z",
       "status": "ok"
     },
     {
@@ -583,7 +583,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:15:46.506348Z",
+      "ts": "2026-11-27T07:25:54.628314Z",
       "status": "ok"
     },
     {
@@ -595,19 +595,19 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:14:56.291523Z",
+      "ts": "2026-11-27T07:24:59.535715Z",
       "status": "ok"
     },
     {
       "sku": "N70381038V",
-      "last_price": 44352.0,
-      "original_price": 44352.0,
+      "last_price": 43559.0,
+      "original_price": 43559.0,
       "seller": "Arab Business",
       "in_stock": true,
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:16:58.245102Z",
+      "ts": "2026-11-27T07:27:06.025877Z",
       "status": "ok"
     },
     {
@@ -619,7 +619,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:15:13.605242Z",
+      "ts": "2026-11-27T07:25:15.830648Z",
       "status": "ok"
     },
     {
@@ -631,7 +631,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:03:27.765598Z",
+      "ts": "2026-11-27T07:13:05.286586Z",
       "status": "ok"
     },
     {
@@ -679,7 +679,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:07:44.637379Z",
+      "ts": "2026-11-27T07:17:31.212724Z",
       "status": "ok"
     },
     {
@@ -691,19 +691,19 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:05:57.423916Z",
+      "ts": "2026-11-27T07:15:44.881598Z",
       "status": "ok"
     },
     {
       "sku": "Z408C1A43202B9A6FDEDAZ",
-      "last_price": 9999.0,
+      "last_price": 9989.0,
       "original_price": 10799.0,
       "seller": "Passap",
       "in_stock": true,
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:10:40.010037Z",
+      "ts": "2026-11-27T07:20:30.459575Z",
       "status": "ok"
     },
     {
@@ -715,7 +715,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:04:00.979916Z",
+      "ts": "2026-11-27T07:13:42.181658Z",
       "status": "ok"
     },
     {
@@ -727,7 +727,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:06:14.516127Z",
+      "ts": "2026-11-27T07:16:00.209836Z",
       "status": "ok"
     },
     {
@@ -751,7 +751,7 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:05:24.699891Z",
+      "ts": "2026-11-27T07:15:09.084931Z",
       "status": "ok"
     },
     {
@@ -799,12 +799,12 @@
       "parse_ok": true,
       "akamai_challenge": false,
       "parser_used": "json_ld",
-      "ts": "2026-11-26T21:10:58.317852Z",
+      "ts": "2026-11-27T07:20:47.379932Z",
       "status": "ok"
     }
   ],
   "first_ts": "2026-11-16T14:48:49.798948Z",
-  "last_ts": "2026-11-26T21:25:27.361038Z",
+  "last_ts": "2026-11-27T07:35:57.771899Z",
   "decision": "go",
   "decision_reasons": []
 }
